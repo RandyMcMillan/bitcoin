@@ -151,3 +151,6 @@ dist/
 *.background.tiff
 
 /guix-build-*
+
+src/rusty/out
+src/rusty/Cargo.lock

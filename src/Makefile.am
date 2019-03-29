@@ -14,6 +14,8 @@ AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(HARDENED_CPPFLAGS)
 AM_LIBTOOLFLAGS = --preserve-dup-deps
 PTHREAD_FLAGS = $(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
 EXTRA_LIBRARIES =
+CLEANFILES =
+LIBBITCOIN_RUST_LIBS =
 
 if EMBEDDED_UNIVALUE
 LIBUNIVALUE = univalue/libunivalue.la
@@ -37,6 +39,9 @@ LIBBITCOIN_CRYPTO_BASE=crypto/libbitcoin_crypto_base.a
 LIBBITCOINQT=qt/libbitcoinqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 
+if ENABLE_RUSTY
+LIBBITCOIN_RUSTY = rusty/out/release/librusty.a
+endif
 if ENABLE_ZMQ
 LIBBITCOIN_ZMQ=libbitcoin_zmq.a
 endif
@@ -640,7 +645,7 @@ bitcoin_bin_ldadd = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-bitcoin_bin_ldadd += $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS)
+bitcoin_bin_ldadd += $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS) $(LIBBITCOIN_RUST_LIBS) $(DL_LIBS)
 
 bitcoind_SOURCES = $(bitcoin_daemon_sources) init/bitcoind.cpp
 bitcoind_CPPFLAGS = $(bitcoin_bin_cppflags)
@@ -750,7 +755,41 @@ CTAES_DIST += crypto/ctaes/ctaes.h
 CTAES_DIST += crypto/ctaes/README.md
 CTAES_DIST += crypto/ctaes/test.c
 
-CLEANFILES = $(EXTRA_LIBRARIES)
+RUSTY_DIST =
+RUSTY_DIST += rusty/build.rs
+RUSTY_DIST += rusty/Cargo.toml
+RUSTY_DIST += rusty/src/lib.rs
+
+if ENABLE_RUSTY
+RUSTY_H_NAMESPACE = rust_hello_world_example
+RUSTY_H = rusty/out/rusty.hpp
+LIBBITCOIN_RUST_LIBS += $(LIBBITCOIN_RUSTY)
+
+$(RUSTY_H): | $(LIBBITCOIN_RUSTY)
+$(libbitcoin_server_a_OBJECTS) : $(RUSTY_H)
+
+# TODO: Teach Cargo how to accept a target filename and upstream
+# See https://github.com/rust-lang/rust/issues/43749
+# Just move it as a temporary hack.
+$(LIBBITCOIN_RUSTY): $(RUSTY_DIST)
+	$(AM_V_at)$(MKDIR_P) rusty/out
+	+$(AM_V_at)cd $(srcdir)/rusty && HEADER_FILE_OVERRIDE=$(abs_builddir)/$(RUSTY_H) NAMESPACE_OVERRIDE="$(RUSTY_H_NAMESPACE)" $(CARGO) build --release --target=$(RUST_TARGET) --target-dir=$(abs_builddir)/rusty/out
+if TARGET_WINDOWS
+	mv rusty/out/$(RUST_TARGET)/release/rusty.lib $@
+else
+	mv rusty/out/$(RUST_TARGET)/release/librusty.a $@
+endif
+
+RUSTY_CHECK=rusty-check
+$(RUSTY_CHECK):
+	cd $(srcdir)/rusty && HEADER_FILE_OVERRIDE=/dev/null NAMESPACE_OVERRIDE="$(RUSTY_H_NAMESPACE)" $(CARGO) test --release --target=$(RUST_TARGET) --target-dir=$(abs_builddir)/rusty/out
+
+CLEANFILES += $(LIBBITCOIN_RUSTY)
+CLEANFILES += $(RUSTY_H)
+
+endif
+
+CLEANFILES += $(EXTRA_LIBRARIES)
 
 CLEANFILES += *.gcda *.gcno
 CLEANFILES += compat/*.gcda compat/*.gcno
@@ -772,7 +811,7 @@ CLEANFILES += wallet/test/*.gcda wallet/test/*.gcno
 CLEANFILES += zmq/*.gcda zmq/*.gcno
 CLEANFILES += obj/build.h
 
-EXTRA_DIST = $(CTAES_DIST)
+EXTRA_DIST = $(CTAES_DIST) $(RUSTY_DIST)
 
 
 config/bitcoin-config.h: config/stamp-h1
@@ -785,6 +824,8 @@ $(top_srcdir)/$(subdir)/config/bitcoin-config.h.in:  $(am__configure_deps)
 clean-local:
 	-$(MAKE) -C secp256k1 clean
 	-$(MAKE) -C univalue clean
+	-rm -rf rusty/release
+	-rm -rf rusty/$(RUST_TARGET)
 	-rm -f leveldb/*/*.gcda leveldb/*/*.gcno leveldb/helpers/memenv/*.gcda leveldb/helpers/memenv/*.gcno
 	-rm -f config.h
 	-rm -rf test/__pycache__
