@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+#
+# bitcoin/contrib/gitian-build.py
+#
+# Mods:
+# * no package management
+# * default --jobs 4
+# * always --detach-sign
+# * always --no-commit
 
 import argparse
 import os
@@ -6,22 +14,22 @@ import subprocess
 import sys
 
 def setup():
-    global args, workdir
-    programs = ['ruby', 'git', 'make', 'wget', 'curl']
-    if args.kvm:
-        programs += ['apt-cacher-ng', 'python-vm-builder', 'qemu-kvm', 'qemu-utils']
-    elif args.docker and not os.path.isfile('/lib/systemd/system/docker.service'):
-        dockers = ['docker.io', 'docker-ce']
-        for i in dockers:
-            return_code = subprocess.call(['sudo', 'apt-get', 'install', '-qq', i])
-            if return_code == 0:
-                break
-        if return_code != 0:
-            print('Cannot find any way to install Docker.', file=sys.stderr)
-            sys.exit(1)
-    else:
-        programs += ['apt-cacher-ng', 'lxc', 'debootstrap']
-    subprocess.check_call(['sudo', 'apt-get', 'install', '-qq'] + programs)
+#    global args, workdir
+#    programs = ['ruby', 'git', 'make', 'wget', 'curl']
+#    if args.kvm:
+#        programs += ['apt-cacher-ng', 'python-vm-builder', 'qemu-kvm', 'qemu-utils']
+#    elif args.docker and not os.path.isfile('/lib/systemd/system/docker.service'):
+#        dockers = ['docker.io', 'docker-ce']
+#        for i in dockers:
+#            return_code = subprocess.call(['sudo', 'apt-get', 'install', '-qq', i])
+#            if return_code == 0:
+#                break
+#        if return_code != 0:
+#            print('Cannot find any way to install Docker.', file=sys.stderr)
+#            sys.exit(1)
+#    else:
+#        programs += ['apt-cacher-ng', 'lxc', 'debootstrap']
+#    subprocess.check_call(['sudo', 'apt-get', 'install', '-qq'] + programs)
     if not os.path.isdir('gitian.sigs'):
         subprocess.check_call(['git', 'clone', 'https://github.com/bitcoin-core/gitian.sigs.git'])
     if not os.path.isdir('bitcoin-detached-sigs'):
@@ -38,10 +46,10 @@ def setup():
         make_image_prog += ['--lxc']
     subprocess.check_call(make_image_prog)
     os.chdir(workdir)
-    if args.is_bionic and not args.kvm and not args.docker:
-        subprocess.check_call(['sudo', 'sed', '-i', 's/lxcbr0/br0/', '/etc/default/lxc-net'])
-        print('Reboot is required')
-        sys.exit(0)
+#    if args.is_bionic and not args.kvm and not args.docker:
+#        subprocess.check_call(['sudo', 'sed', '-i', 's/lxcbr0/br0/', '/etc/default/lxc-net'])
+#        print('Reboot is required')
+#        sys.exit(0)
 
 def build():
     global args, workdir
@@ -161,7 +169,7 @@ def main():
     parser.add_argument('-s', '--sign', action='store_true', dest='sign', help='Make signed binaries for Windows and MacOS')
     parser.add_argument('-B', '--buildsign', action='store_true', dest='buildsign', help='Build both signed and unsigned binaries')
     parser.add_argument('-o', '--os', dest='os', default='lwm', help='Specify which Operating Systems the build is for. Default is %(default)s. l for Linux, w for Windows, m for MacOS')
-    parser.add_argument('-j', '--jobs', dest='jobs', default='2', help='Number of processes to use. Default %(default)s')
+    parser.add_argument('-j', '--jobs', dest='jobs', default='4', help='Number of processes to use. Default %(default)s')
     parser.add_argument('-m', '--memory', dest='memory', default='2000', help='Memory to allocate in MiB. Default %(default)s')
     parser.add_argument('-k', '--kvm', action='store_true', dest='kvm', help='Use KVM instead of LXC')
     parser.add_argument('-d', '--docker', action='store_true', dest='docker', help='Use Docker instead of LXC')
@@ -212,7 +220,8 @@ def main():
         print('Cannot build for MacOS, SDK does not exist. Will build for other OSes')
         args.macos = False
 
-    args.sign_prog = 'true' if args.detach_sign else 'gpg --detach-sign'
+    args.sign_prog = 'true' #if args.detach_sign else 'gpg --detach-sign'
+    args.commit_files = False
 
     script_name = os.path.basename(sys.argv[0])
     if not args.signer:
