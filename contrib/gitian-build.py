@@ -35,7 +35,7 @@ def setup():
     if not os.path.isdir('bitcoin-detached-sigs'):
         subprocess.check_call(['git', 'clone', 'https://github.com/bitcoin-core/bitcoin-detached-sigs.git'])
     if not os.path.isdir('gitian-builder'):
-        subprocess.check_call(['git', 'clone', 'https://github.com/devrandom/gitian-builder.git'])
+        subprocess.check_call(['git', 'clone', 'https://github.com/hebasto/gitian-builder.git'])
     if not os.path.isdir('bitcoin'):
         subprocess.check_call(['git', 'clone', 'https://github.com/bitcoin/bitcoin.git'])
     os.chdir('gitian-builder')
@@ -250,9 +250,9 @@ def main():
     subprocess.check_call(['git', 'checkout', args.commit])
     os.chdir(workdir)
 
-    os.chdir('gitian-builder')
-    subprocess.check_call(['git', 'pull'])
-    os.chdir(workdir)
+#    os.chdir('gitian-builder')
+#    subprocess.check_call(['git', 'pull'])
+#    os.chdir(workdir)
 
     if args.build:
         build()
