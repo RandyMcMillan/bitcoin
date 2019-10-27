@@ -9,6 +9,7 @@
 
 #include <randomenv.h>
 
+#include <compat/cpuid.h>
 #include <crypto/sha512.h>
 #include <support/cleanse.h>
 #include <util/time.h> // for GetTime()
@@ -162,6 +163,25 @@ void AddSysctl(CSHA512& hasher, const char* path)
 #endif
 }
 
+#ifdef HAVE_GETCPUID
+void AddCPUID(CSHA512& hasher)
+{
+    uint32_t ax, bx, cx, dx;
+    GetCPUID(0, 0, ax, bx, cx, dx);
+    hasher << ax << bx << cx << dx;
+    uint32_t max = ax;
+    for (uint32_t leaf = 1; leaf <= max; ++leaf) {
+        for (uint32_t subleaf = 0;; ++subleaf) {
+            GetCPUID(leaf, subleaf, ax, bx, cx, dx);
+            hasher << leaf << subleaf << ax << bx << cx << dx;
+            // Iterate over subleaves for leaf 4, 11, 13
+            if (leaf != 4 && leaf != 11 && leaf != 13) break;
+            if ((leaf == 4 || leaf == 13) && ax == 0) break;
+            if (leaf == 11 && (cx & 0xFF00) == 0) break;
+        }
+    }
+}
+#endif
 } // namespace
 
 void RandAddDynamicEnv(CSHA512& hasher)
@@ -234,6 +254,10 @@ void RandAddStaticEnv(CSHA512& hasher)
 #if defined(_XOPEN_VERSION)
     x = _XOPEN_VERSION;
     hasher << x;
+#endif
+
+#ifdef HAVE_GETCPUID
+    AddCPUID(hasher);
 #endif
 
     // Memory locations
