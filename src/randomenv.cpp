@@ -13,9 +13,19 @@
 #endif
 
 #include <algorithm>
+#include <thread>
 #include <vector>
 
 #include <stdint.h>
+#include <string.h>
+#ifndef WIN32
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+#ifdef __MACH__
+#include <mach/mach_time.h>
+#endif
 
 namespace {
 
@@ -57,13 +67,47 @@ void RandAddSeedPerfmon(CSHA512& hasher)
 #endif
 }
 
+/** Helper to easily feed data into a CSHA512.
+ *
+ * Note that this does not serialize the passed object (like stream.h's << operators do).
+ * Its raw memory representation is used directly.
+ */
+template<typename T>
+CSHA512& operator<<(CSHA512& hasher, const T& data) {
+    hasher.Write((const unsigned char*)&data, sizeof(data));
+    return hasher;
+}
+
 } // namespace
 
 void RandAddDynamicEnv(CSHA512& hasher)
 {
     RandAddSeedPerfmon(hasher);
+
+#ifdef WIN32
+    FILETIME ftime;
+    GetSystemTimeAsFileTime(&ftime);
+    hasher << ftime;
+#else
+#  ifdef __MACH__
+    hasher << mach_absolute_time();
+#  else
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    hasher << ts.tv_sec << ts.tv_nsec;
+#  endif
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    hasher << tv.tv_sec << tv.tv_usec;
+#endif
 }
 
 void RandAddStaticEnv(CSHA512& hasher)
 {
+#ifdef WIN32
+    hasher << GetCurrentProcessId() << GetCurrentThreadId();
+#else
+    hasher << getpid();
+#endif
+    hasher << std::this_thread::get_id();
 }
