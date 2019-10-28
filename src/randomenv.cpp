@@ -40,6 +40,9 @@
 #if HAVE_DECL_GETIFADDRS
 #include <ifaddrs.h>
 #endif
+#if HAVE_DECL_SYSCTLBYNAME
+#include <sys/sysctl.h>
+#endif
 
 //! Necessary on some platforms
 extern char** environ;
@@ -146,6 +149,18 @@ void AddPath(CSHA512& hasher, const char *path)
 }
 #endif
 
+void AddSysctl(CSHA512& hasher, const char* path)
+{
+#if HAVE_DECL_SYSCTLBYNAME
+    unsigned char buffer[4096];
+    size_t siz = 4096;
+    int ret = sysctlbyname(path, buffer, &siz, nullptr, 0);
+    if (ret == 0 || (ret == -1 && errno == ENOMEM)) {
+        hasher.Write((const unsigned char*)path, strlen(path) + 1);
+        hasher.Write(buffer, std::min<size_t>(siz, 4096));
+    }
+#endif
+}
 
 } // namespace
 
@@ -188,6 +203,9 @@ void RandAddDynamicEnv(CSHA512& hasher)
     AddFile(hasher, "/proc/self/status");
 #endif
 #endif
+
+    AddSysctl(hasher, "vm.loadavg");
+    AddSysctl(hasher, "vm.swapusage");
 
     // Stack and heap location
     void* addr = malloc(4097);
@@ -273,9 +291,36 @@ void RandAddStaticEnv(CSHA512& hasher)
     AddFile(hasher, "/etc/timezone");
     AddFile(hasher, "/etc/localtime");
     AddFile(hasher, "/etc/hostconfig");
-
-    /* TODO: sysctl's for OSX to fetch information not available from /proc */
 #endif
+
+    // For MacOS/BSDs, gather data through sysctl instead of /proc
+    AddSysctl(hasher, "hw.cpufrequency");
+    AddSysctl(hasher, "hw.cpusubtype");
+    AddSysctl(hasher, "hw.cputype");
+    AddSysctl(hasher, "hw.l1dcachesize");
+    AddSysctl(hasher, "hw.l1icachesize");
+    AddSysctl(hasher, "hw.l2cachesize");
+    AddSysctl(hasher, "hw.l3cachesize");
+    AddSysctl(hasher, "hw.machine");
+    AddSysctl(hasher, "hw.machine_arch");
+    AddSysctl(hasher, "hw.memsize");
+    AddSysctl(hasher, "hw.model");
+    AddSysctl(hasher, "hw.ncpu");
+    AddSysctl(hasher, "hw.physmem");
+    AddSysctl(hasher, "hw.usermem");
+    AddSysctl(hasher, "hw.realmem");
+    AddSysctl(hasher, "kern.bootargs");
+    AddSysctl(hasher, "kern.boottime");
+    AddSysctl(hasher, "kern.domainname");
+    AddSysctl(hasher, "kern.hostid");
+    AddSysctl(hasher, "kern.hostname");
+    AddSysctl(hasher, "kern.ostype");
+    AddSysctl(hasher, "kern.osreldate");
+    AddSysctl(hasher, "kern.osrelease");
+    AddSysctl(hasher, "kern.osrevision");
+    AddSysctl(hasher, "kern.uuid");
+    AddSysctl(hasher, "kern.version");
+    AddSysctl(hasher, "kern.waketime");
 
     // Env variables
     if (environ) {
