@@ -18,6 +18,7 @@
 #endif
 
 #include <algorithm>
+#include <atomic>
 #include <climits>
 #include <thread>
 #include <vector>
@@ -60,10 +61,11 @@ void RandAddSeedPerfmon(CSHA512& hasher)
     // Seed with the entire set of perfmon data
 
     // This can take up to 2 seconds, so only do it every 10 minutes
-    static int64_t nLastPerfmon;
-    if (GetTime() < nLastPerfmon + 10 * 60)
-        return;
-    nLastPerfmon = GetTime();
+    static std::atomic<std::chrono::seconds> last_perfmon{std::chrono::seconds{0}};
+    auto last_time = last_perfmon.load();
+    auto current_time = GetTime<std::chrono::seconds>();
+    if (current_time < last_time + std::chrono::minutes{10}) return;
+    last_perfmon = current_time;
 
     std::vector<unsigned char> vData(250000, 0);
     long ret = 0;
