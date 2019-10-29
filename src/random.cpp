@@ -507,18 +507,30 @@ static void SeedSlow(CSHA512& hasher) noexcept
 }
 
 /** Extract entropy from rng, strengthen it, and feed it into hasher. */
-static void SeedStrengthen(CSHA512& hasher, RNGState& rng) noexcept
+static void SeedStrengthen(CSHA512& hasher, RNGState& rng, int microseconds) noexcept
 {
-    static std::atomic<int64_t> last_strengthen{0};
-    int64_t last_time = last_strengthen.load();
-    int64_t current_time = GetTimeMicros();
-    if (current_time > last_time + 60000000) { // Only run once a minute
-        // Generate 32 bytes of entropy from the RNG, and a copy of the entropy already in hasher.
-        unsigned char strengthen_seed[32];
-        rng.MixExtract(strengthen_seed, sizeof(strengthen_seed), CSHA512(hasher), false);
-        // Strengthen it for 10ms (100ms on first run), and feed it into hasher.
-        Strengthen(strengthen_seed, last_time == 0 ? 100000 : 10000, hasher);
-        last_strengthen = current_time;
+    // Generate 32 bytes of entropy from the RNG, and a copy of the entropy already in hasher.
+    unsigned char strengthen_seed[32];
+    rng.MixExtract(strengthen_seed, sizeof(strengthen_seed), CSHA512(hasher), false);
+    // Strengthen the seed, and feed it into hasher.
+    Strengthen(strengthen_seed, microseconds, hasher);
+}
+
+static void SeedInfrequent(CSHA512& hasher, RNGState& rng)
+{
+    // Run expensive seeding operations infrequently.
+    static std::atomic<std::chrono::seconds> last{std::chrono::seconds{0}};
+    auto last_time = last.load();
+    auto current_time = GetTime<std::chrono::seconds>();
+    if (current_time > last_time + std::chrono::minutes{1}) {
+        // Dynamic environment data (performance monitoring, ...)
+        RandAddDynamicEnv(hasher);
+
+        // Strengthen for 10 ms
+        SeedStrengthen(hasher, rng, 10000);
+
+        // Update the timestamp
+        last = current_time;
     }
 }
 
@@ -536,11 +548,8 @@ static void SeedSleep(CSHA512& hasher, RNGState& rng)
     // High-precision timestamp after sleeping (as we commit to both the time before and after, this measures the delay)
     SeedTimestamp(hasher);
 
-    // Dynamic environment data (performance monitoring, ...; once every 10 minutes)
-    RandAddDynamicEnv(hasher);
-
-    // Strengthen every minute
-    SeedStrengthen(hasher, rng);
+    // If enough time has passed, run expensive seeding operations.
+    SeedInfrequent(hasher, rng);
 }
 
 static void SeedStartup(CSHA512& hasher, RNGState& rng) noexcept
@@ -551,20 +560,29 @@ static void SeedStartup(CSHA512& hasher, RNGState& rng) noexcept
     // Everything that the 'slow' seeder includes.
     SeedSlow(hasher);
 
-    // Dynamic environment data
-    RandAddDynamicEnv(hasher);
+    // Expensive seeding operations (including dynamic environment data)
+    SeedInfrequent(hasher, rng);
 
     // Static environment data
     RandAddStaticEnv(hasher);
 
     // Strengthen
-    SeedStrengthen(hasher, rng);
+    SeedStrengthen(hasher, rng, 100000);
+}
+
+static void SeedPeriodic(CSHA512& hasher, RNGState& rng) noexcept
+{
+    // When seeding in the background, do the same as SeedSleep, but without the sleep.
+    SeedFast(hasher);
+    SeedTimestamp(hasher);
+    SeedInfrequent(hasher, rng);
 }
 
 enum class RNGLevel {
     FAST, //!< Automatically called by GetRandBytes
     SLOW, //!< Automatically called by GetStrongRandBytes
     SLEEP, //!< Called by RandAddSeedSleep()
+    PERIODIC, //!< Called by RandAddPeriodic()
 };
 
 static void ProcRand(unsigned char* out, int num, RNGLevel level)
@@ -584,6 +602,9 @@ static void ProcRand(unsigned char* out, int num, RNGLevel level)
         break;
     case RNGLevel::SLEEP:
         SeedSleep(hasher, rng);
+        break;
+    case RNGLevel::PERIODIC:
+        SeedPeriodic(hasher, rng);
         break;
     }
 
@@ -607,6 +628,7 @@ static void ProcRand(unsigned char* out, int num, RNGLevel level)
 void GetRandBytes(unsigned char* buf, int num) noexcept { ProcRand(buf, num, RNGLevel::FAST); }
 void GetStrongRandBytes(unsigned char* buf, int num) noexcept { ProcRand(buf, num, RNGLevel::SLOW); }
 void RandAddSeedSleep() { ProcRand(nullptr, 0, RNGLevel::SLEEP); }
+void RandAddPeriodic() { ProcRand(nullptr, 0, RNGLevel::PERIODIC); }
 
 bool g_mock_deterministic_tests{false};
 

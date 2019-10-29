@@ -91,6 +91,13 @@ void GetStrongRandBytes(unsigned char* buf, int num) noexcept;
 void RandAddSeedSleep();
 
 /**
+ * Gather entropy from various sources, and feed them to the PRNG state.
+ *
+ * Thread-safe.
+ */
+void RandAddPeriodic();
+
+/**
  * Fast randomness source. This is seeded once with secure random data, but
  * is completely deterministic and does not gather more entropy after that.
  *
