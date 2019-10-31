@@ -8,6 +8,8 @@
 #endif
 
 #include <randomenv.h>
+#include <inttypes.h>
+#include <logging.h>
 
 #include <compat/cpuid.h>
 #include <crypto/sha512.h>
@@ -194,23 +196,37 @@ void RandAddDynamicEnv(CSHA512& hasher)
     RandAddSeedPerfmon(hasher);
 
 #ifdef WIN32
+    // used by OpenSSL 1.1.1 (stable)
     FILETIME ftime;
     GetSystemTimeAsFileTime(&ftime);
     hasher << ftime;
 #else
 #  ifdef __MACH__
+    // macOS /usr/include/mach/mach_time.h
+    // __OSX_AVAILABLE_STARTING(__MAC_10_9, __IPHONE_8_0)
+    // uint64_t                        mach_approximate_time(void);
+    // Can't find any calls in OpenSSL
+    LogPrintf("mach_absolute_time: %" PRIu64 "\n", mach_absolute_time());
     hasher << mach_absolute_time();
 #  else
     struct timespec ts;
+    // OpenSSL (1.1.1 stable) uses CLOCK_REALTIME - System-wide realtime clock
+    // CLOCK_MONOTOMIC - clock that cannot be set,
+    // represents monotonic time since some unspecified starting point.
     clock_gettime(CLOCK_MONOTONIC, &ts);
     hasher << ts.tv_sec << ts.tv_nsec;
 #  endif
     struct timeval tv;
+    // OpenSSL uses gettimeofday in get_time_stamp and get_timer_bits - rand_unix.c
     gettimeofday(&tv, nullptr);
     hasher << tv.tv_sec << tv.tv_usec;
 
     // Current resource usage.
     struct rusage usage;
+    // RUSAGE_SELF - Return resource usage statistics for the calling process, 
+    // which is the sum of resources used by all threads in the process.
+    // https://linux.die.net/man/2/getrusage
+    // The "newest" field here (maxrss) requires linux 2.6.32 (Debian 6.0.9, Ubuntu 10.04.4 - see symbol-check.py)
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
         hasher << usage.ru_utime.tv_sec << usage.ru_utime.tv_usec << usage.ru_stime.tv_sec << usage.ru_stime.tv_usec;
         hasher << usage.ru_maxrss << usage.ru_minflt << usage.ru_majflt << usage.ru_inblock << usage.ru_oublock;
@@ -218,13 +234,15 @@ void RandAddDynamicEnv(CSHA512& hasher)
     }
 
 #ifdef __linux__
-    AddFile(hasher, "/proc/diskstats");
-    AddFile(hasher, "/proc/vmstat");
-    AddFile(hasher, "/proc/schedstat");
-    AddFile(hasher, "/proc/zoneinfo");
-    AddFile(hasher, "/proc/meminfo");
+    // https://linux.die.net/man/5/proc
+    AddFile(hasher, "/proc/diskstats"); // disk I/O statistics for each disk device (2.5.69)
+    AddFile(hasher, "/proc/vmstat"); // various virtual memory statistics.
+    AddFile(hasher, "/proc/schedstat"); // ?
+    AddFile(hasher, "/proc/zoneinfo"); // information about memory zones (2.6.13)
+    AddFile(hasher, "/proc/meminfo"); // reports statistics about memory usage on the system
     AddFile(hasher, "/proc/softirqs");
     AddFile(hasher, "/proc/stat");
+    // /proc/self/ - refers to the process accessing the /proc filesystem
     AddFile(hasher, "/proc/self/status");
 #endif
 #endif
