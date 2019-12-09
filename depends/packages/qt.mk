@@ -8,7 +8,7 @@ $(package)_dependencies=zlib
 $(package)_linux_dependencies=freetype fontconfig libxcb libxkbcommon libxcb_util libxcb_util_render libxcb_util_keysyms libxcb_util_image libxcb_util_wm
 $(package)_build_subdir=qtbase
 $(package)_qt_libs=corelib network widgets gui plugins testlib
-$(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_configure_mac.patch fix_no_printer.patch
+$(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch
 $(package)_patches+= fix_rcc_determinism.patch fix_riscv64_arch.patch xkb-default.patch no-xlib.patch
 $(package)_patches+= fix_android_qmake_conf.patch fix_android_jni_static.patch dont_hardcode_pwd.patch
 $(package)_patches+= freetype_back_compat.patch drop_lrelease_dependency.patch
@@ -205,7 +205,6 @@ define $(package)_preprocess_cmds
   cp -r qtbase/mkspecs/linux-arm-gnueabi-g++ qtbase/mkspecs/bitcoin-linux-g++ && \
   sed -i.old "s/arm-linux-gnueabi-/$(host)-/g" qtbase/mkspecs/bitcoin-linux-g++/qmake.conf && \
   patch -p1 -i $($(package)_patch_dir)/fix_qt_pkgconfig.patch &&\
-  patch -p1 -i $($(package)_patch_dir)/fix_configure_mac.patch &&\
   patch -p1 -i $($(package)_patch_dir)/fix_no_printer.patch &&\
   patch -p1 -i $($(package)_patch_dir)/fix_rcc_determinism.patch &&\
   patch -p1 -i $($(package)_patch_dir)/xkb-default.patch &&\
