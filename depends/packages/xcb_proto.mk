@@ -1,8 +1,8 @@
 package=xcb_proto
-$(package)_version=1.10
+$(package)_version=1.11
 $(package)_download_path=https://xcb.freedesktop.org/dist
 $(package)_file_name=xcb-proto-$($(package)_version).tar.bz2
-$(package)_sha256_hash=7ef40ddd855b750bc597d2a435da21e55e502a0fefa85b274f2c922800baaf05
+$(package)_sha256_hash=b4aceee6502a0ce45fc39b33c541a2df4715d00b72e660ebe8c5bb444771e32e
 
 define $(package)_config_cmds
   $($(package)_autoconf)
