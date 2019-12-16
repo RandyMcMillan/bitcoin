@@ -3,7 +3,7 @@ $(package)_version=1.11.1
 $(package)_download_path=https://xcb.freedesktop.org/dist
 $(package)_file_name=$(package)-$($(package)_version).tar.bz2
 $(package)_sha256_hash=b720fd6c7d200e5371affdb3f049cc8f88cff9aed942ff1b824d95eedbf69d30
-$(package)_dependencies=xcb_proto libXau
+$(package)_dependencies=xcb_proto libXau libxkbcommon
 
 define $(package)_set_vars
 $(package)_config_opts=--disable-static --disable-devel-docs --without-doxygen --without-launchd
@@ -17,7 +17,7 @@ $(package)_config_opts += --disable-present --disable-randr --disable-record
 $(package)_config_opts += --disable-render --disable-resource --disable-screensaver
 $(package)_config_opts += --disable-shape --disable-shm --disable-sync
 $(package)_config_opts += --disable-xevie --disable-xfixes --disable-xfree86-dri
-$(package)_config_opts += --disable-xinerama --disable-xinput --disable-xkb
+$(package)_config_opts += --disable-xinerama --disable-xinput
 $(package)_config_opts += --disable-xprint --disable-selinux --disable-xtest
 $(package)_config_opts += --disable-xv --disable-xvmc
 endef
