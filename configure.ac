@@ -344,6 +344,14 @@ if test "x$CXXFLAGS_overridden" = "xno"; then
   AX_CHECK_COMPILE_FLAG([-Wredundant-decls],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wredundant-decls"],,[[$CXXFLAG_WERROR]])
   AX_CHECK_COMPILE_FLAG([-Wunused-variable],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wunused-variable"],,[[$CXXFLAG_WERROR]])
   AX_CHECK_COMPILE_FLAG([-Wdate-time],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wdate-time"],,[[$CXXFLAG_WERROR]])
+  AX_CHECK_COMPILE_FLAG([-Wdouble-promotion],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wdouble-promotion"],,[[$CXXFLAG_WERROR]])
+  dnl AX_CHECK_COMPILE_FLAG([-Wimplicit-fallthrough],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wimplicit-fallthrough"],,[[$CXXFLAG_WERROR]])
+  AX_CHECK_COMPILE_FLAG([-Woverloaded-virtual],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Woverloaded-virtual"],,[[$CXXFLAG_WERROR]])
+  AX_CHECK_COMPILE_FLAG([-Wshadow-uncaptured-local],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wshadow-uncaptured-local"],,[[$CXXFLAG_WERROR]])
+  AX_CHECK_COMPILE_FLAG([-Wunreachable-code-loop-increment],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wunreachable-code-loop-increment"],,[[$CXXFLAG_WERROR]])
+  AX_CHECK_COMPILE_FLAG([-Wunreachable-code-return],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wunreachable-code-return"],,[[$CXXFLAG_WERROR]])
+  AX_CHECK_COMPILE_FLAG([-Wunused-member-function],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wunused-member-function"],,[[$CXXFLAG_WERROR]])
+  AX_CHECK_COMPILE_FLAG([-Wunused-template],[WARN_CXXFLAGS="$WARN_CXXFLAGS -Wunused-template"],,[[$CXXFLAG_WERROR]])
 
   dnl Some compilers (gcc) ignore unknown -Wno-* options, but warn about all
   dnl unknown options if any other warning is produced. Test the -Wfoo case, and
@@ -352,7 +360,7 @@ if test "x$CXXFLAGS_overridden" = "xno"; then
   AX_CHECK_COMPILE_FLAG([-Wself-assign],[NOWARN_CXXFLAGS="$NOWARN_CXXFLAGS -Wno-self-assign"],,[[$CXXFLAG_WERROR]])
   AX_CHECK_COMPILE_FLAG([-Wunused-local-typedef],[NOWARN_CXXFLAGS="$NOWARN_CXXFLAGS -Wno-unused-local-typedef"],,[[$CXXFLAG_WERROR]])
   AX_CHECK_COMPILE_FLAG([-Wdeprecated-register],[NOWARN_CXXFLAGS="$NOWARN_CXXFLAGS -Wno-deprecated-register"],,[[$CXXFLAG_WERROR]])
-  AX_CHECK_COMPILE_FLAG([-Wimplicit-fallthrough],[NOWARN_CXXFLAGS="$NOWARN_CXXFLAGS -Wno-implicit-fallthrough"],,[[$CXXFLAG_WERROR]])
+  dnl AX_CHECK_COMPILE_FLAG([-Wimplicit-fallthrough],[NOWARN_CXXFLAGS="$NOWARN_CXXFLAGS -Wno-implicit-fallthrough"],,[[$CXXFLAG_WERROR]])
 fi
 
 enable_hwcrc32=no
