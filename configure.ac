@@ -740,6 +740,9 @@ if test x$TARGET_OS != xwindows; then
   AX_CHECK_COMPILE_FLAG([-fPIC],[PIC_FLAGS="-fPIC"])
 fi
 
+dnl tell the linker not to embed a build id
+AX_CHECK_LINK_FLAG([[-Wl,--build-id=none]], [LDFLAGS="$LDFLAGS -Wl,--build-id=none"])
+
 dnl All versions of gcc that we commonly use for building are subject to bug
 dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90348. To work around that, set
 dnl -fstack-reuse=none for all gcc builds. (Only gcc understands this flag)
