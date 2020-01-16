@@ -743,6 +743,9 @@ fi
 dnl tell the linker not to embed a build id
 AX_CHECK_LINK_FLAG([[-Wl,--build-id=none]], [LDFLAGS="$LDFLAGS -Wl,--build-id=none"])
 
+dnl don't put compiler and/or linker versions into .comment section in binaries
+AX_CHECK_COMPILE_FLAG([-fno-ident],[WARN_CXXFLAGS="$WARN_CXXFLAGS -fno-ident"],,[[$CXXFLAG_WERROR]])
+
 dnl All versions of gcc that we commonly use for building are subject to bug
 dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90348. To work around that, set
 dnl -fstack-reuse=none for all gcc builds. (Only gcc understands this flag)
