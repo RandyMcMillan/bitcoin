@@ -45,6 +45,7 @@ install:
         Write-Host "required vcpkg packages already installed."
       }
       c:\tools\vcpkg\vcpkg integrate install
+- cmd: appveyor exit
 before_build:
 - ps:  clcache -M 536870912
 # Powershell block below is to download and extract the Qt static libraries. The pseudo code is:
