@@ -194,11 +194,8 @@ public:
     }
     int64_t getLastBlockTime() override
     {
-        LOCK(::cs_main);
-        if (::ChainActive().Tip()) {
-            return ::ChainActive().Tip()->GetBlockTime();
-        }
-        return Params().GenesisBlock().GetBlockTime(); // Genesis block's time of current network
+        const CBlockIndex* tip = WITH_LOCK(::cs_main, return ::ChainActive().Tip());
+        return tip ? tip->GetBlockTime() : Params().GenesisBlock().GetBlockTime();  // Genesis block's time of current network
     }
     double getVerificationProgress() override
     {
