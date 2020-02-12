@@ -49,7 +49,7 @@ Var StartMenuGroup
 OutFile @abs_top_srcdir@/@PACKAGE_TARNAME@-@PACKAGE_VERSION@-win64-setup-unsigned.exe
 InstallDir $PROGRAMFILES64\Bitcoin
 CRCCheck force
-XPStyle on
+XPStyle off
 BrandingText " "
 ShowInstDetails show
 VIProductVersion @CLIENT_VERSION_MAJOR@.@CLIENT_VERSION_MINOR@.@CLIENT_VERSION_REVISION@.@CLIENT_VERSION_BUILD@
