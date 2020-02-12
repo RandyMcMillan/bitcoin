@@ -64,6 +64,10 @@
 #include <stdio.h>
 #include <set>
 
+#ifdef WIN32
+#include <versionhelpers.h>
+#endif
+
 #ifndef WIN32
 #include <attributes.h>
 #include <cerrno>
@@ -890,6 +894,77 @@ bool AppInitBasicSetup()
 #ifdef WIN32
     // Enable heap terminate-on-corruption
     HeapSetInformation(nullptr, HeapEnableTerminationOnCorruption, nullptr, 0);
+
+    std::cout << "IsWindows10OrGreater(): " << IsWindows10OrGreater() << "\n";
+
+    HANDLE currentProcess = GetCurrentProcess();
+
+    // DEP policy
+    PROCESS_MITIGATION_DEP_POLICY depPolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessDEPPolicy, &depPolicy, sizeof(depPolicy));
+    std::cout << "Enable: " << depPolicy.Enable << "\n";
+    std::cout << "DisableAtlThunkEmulation: " << depPolicy.DisableAtlThunkEmulation << "\n\n";
+
+    // ASLR policy
+    PROCESS_MITIGATION_ASLR_POLICY aslrPolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessASLRPolicy, &aslrPolicy, sizeof(aslrPolicy));
+    std::cout << "EnableBottomUpRandomization: " << aslrPolicy.EnableBottomUpRandomization << "\n";
+    std::cout << "EnableForceRelocateImages: " << aslrPolicy.EnableForceRelocateImages << "\n";
+    std::cout << "EnableHighEntropy: " << aslrPolicy.EnableHighEntropy << "\n";
+    std::cout << "DisallowStrippedImages: " << aslrPolicy.DisallowStrippedImages << "\n\n";
+
+    // dynamic code policy
+    PROCESS_MITIGATION_DYNAMIC_CODE_POLICY dynamicCodePolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessDynamicCodePolicy, &dynamicCodePolicy, sizeof(dynamicCodePolicy));
+    std::cout << "ProhibitDynamicCode: " << dynamicCodePolicy.ProhibitDynamicCode << "\n";
+    std::cout << "AllowThreadOptOut: " << dynamicCodePolicy.AllowThreadOptOut << "\n";
+    std::cout << "AllowRemoteDowngrade: " << dynamicCodePolicy.AllowRemoteDowngrade << "\n\n";
+
+    // strict handle check
+    PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY handlePolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessStrictHandleCheckPolicy, &handlePolicy, sizeof(handlePolicy));
+    std::cout << "RaiseExceptionOnInvalidHandleReference: " << handlePolicy.RaiseExceptionOnInvalidHandleReference << "\n";
+    std::cout << "HandleExceptionsPermanentlyEnabled: " << handlePolicy.HandleExceptionsPermanentlyEnabled << "\n\n";
+
+    // system call disable
+    PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY callPolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessSystemCallDisablePolicy, &callPolicy, sizeof(callPolicy));
+    std::cout << "DisallowWin32kSystemCalls: " << callPolicy.DisallowWin32kSystemCalls << "\n\n";
+
+    // extension point disable
+    PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY extensionPolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessExtensionPointDisablePolicy, &extensionPolicy, sizeof(extensionPolicy));
+    std::cout << "DisableExtensionPoints: " << extensionPolicy.DisableExtensionPoints << "\n\n";
+
+    // control flow guard
+    PROCESS_MITIGATION_CONTROL_FLOW_GUARD_POLICY cfgPolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessControlFlowGuardPolicy, &cfgPolicy, sizeof(cfgPolicy));
+    std::cout << "EnableControlFlowGuard: " << cfgPolicy.EnableControlFlowGuard << "\n";
+    std::cout << "EnableExportSuppression: " << cfgPolicy.EnableExportSuppression << "\n";
+    std::cout << "StrictMode: " << cfgPolicy.StrictMode << "\n\n";
+
+    // process signature policy
+    PROCESS_MITIGATION_BINARY_SIGNATURE_POLICY sigPolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessSignaturePolicy, &sigPolicy, sizeof(sigPolicy));
+    std::cout << "MicrosoftSignedOnly: " << sigPolicy.MicrosoftSignedOnly << "\n";
+    std::cout << "StoreSignedOnly: " << sigPolicy.StoreSignedOnly << "\n";
+    std::cout << "MitigationOptIn: " << sigPolicy.MitigationOptIn << "\n\n";
+
+    // font disable policy
+    PROCESS_MITIGATION_FONT_DISABLE_POLICY fontPolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessFontDisablePolicy, &fontPolicy, sizeof(fontPolicy));
+    std::cout << "DisableNonSystemFonts: " << fontPolicy.DisableNonSystemFonts << "\n";
+    std::cout << "AuditNonSystemFontLoading: " << fontPolicy.AuditNonSystemFontLoading << "\n\n";
+
+    // image load policy
+    PROCESS_MITIGATION_IMAGE_LOAD_POLICY imagePolicy = {};
+    GetProcessMitigationPolicy(currentProcess, ProcessImageLoadPolicy, &imagePolicy, sizeof(imagePolicy));
+    std::cout << "NoRemoteImages: " << imagePolicy.NoRemoteImages << "\n";
+    std::cout << "NoLowMandatoryLabelImages: " << imagePolicy.NoLowMandatoryLabelImages << "\n";
+    std::cout << "PreferSystem32Images: " << imagePolicy.PreferSystem32Images << "\n\n";
+
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::abort();
 #endif
 
     if (!SetupNetworking())
