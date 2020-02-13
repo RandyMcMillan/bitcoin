@@ -756,6 +756,10 @@ if test x$use_hardening != xno; then
   esac
 fi
 
+if test x$TARGET_OS = xwindows; then
+  AX_CHECK_LINK_FLAG([[-Wl,--no-insert-timestamp]], [LDFLAGS="$LDFLAGS -Wl,--no-insert-timestamp"])
+fi
+
 dnl this flag screws up non-darwin gcc even when the check fails. special-case it.
 if test x$TARGET_OS = xdarwin; then
   AX_CHECK_LINK_FLAG([[-Wl,-dead_strip]], [LDFLAGS="$LDFLAGS -Wl,-dead_strip"])
