@@ -38,18 +38,18 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 #endif
-#if HAVE_DECL_GETIFADDRS
+#ifdef HAVE_DECL_GETIFADDRS
 #include <ifaddrs.h>
 #endif
-#if HAVE_SYSCTL
+#ifdef HAVE_SYSCTL
 #include <sys/sysctl.h>
-#if HAVE_VM_VM_PARAM_H
+#ifdef HAVE_VM_VM_PARAM_H
 #include <vm/vm_param.h>
 #endif
-#if HAVE_SYS_RESOURCES_H
+#ifdef HAVE_SYS_RESOURCES_H
 #include <sys/resources.h>
 #endif
-#if HAVE_SYS_VMMETER_H
+#ifdef HAVE_SYS_VMMETER_H
 #include <sys/vmmeter.h>
 #endif
 #endif
