@@ -656,6 +656,7 @@ void RPCConsole::setClientModel(ClientModel *model, int bestblock_height, int64_
     }
 
     ui->trafficGraph->setClientModel(model);
+    ui->mempool_graph->setClientModel(model);
     if (model && clientModel->getPeerTableModel() && clientModel->getBanTableModel()) {
         // Keep up to date with client
         setNumConnections(model->getNumConnections());
@@ -1354,6 +1355,7 @@ QKeySequence RPCConsole::tabShortcut(TabTypes tab_type) const
     switch (tab_type) {
     case TabTypes::INFO: return QKeySequence(tr("Ctrl+I"));
     case TabTypes::CONSOLE: return QKeySequence(tr("Ctrl+T"));
+    case TabTypes::MEMPOOL: return QKeySequence(tr("Ctrl+M"));
     case TabTypes::GRAPH: return QKeySequence(tr("Ctrl+N"));
     case TabTypes::PEERS: return QKeySequence(tr("Ctrl+P"));
     } // no default case, so the compiler can warn about missing cases
