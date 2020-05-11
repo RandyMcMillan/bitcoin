@@ -252,7 +252,7 @@ static void Strengthen(const unsigned char (&seed)[32], int microseconds, CSHA51
     memory_cleanse(buffer, sizeof(buffer));
 }
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(MAC_OSX)
 /** Fallback: get 32 bytes of system entropy from /dev/urandom. The most
  * compatible way to get cryptographic randomness on UNIX-ish platforms.
  */
