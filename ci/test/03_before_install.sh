@@ -6,6 +6,11 @@
 
 export LC_ALL=C.UTF-8
 
+echo "INFO START"
+cat /etc/hostname
+cat /etc/hosts
+echo "INFO END"
+
 BEGIN_FOLD () {
   echo ""
   CURRENT_FOLD_NAME=$1
