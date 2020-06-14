@@ -14,3 +14,6 @@ fi
 command -v autoreconf >/dev/null || \
   (echo "configuration failed, please install autoconf first" && exit 1)
 autoreconf --install --force --warnings=all
+
+# subdirs are not getting picked up when using the AX_SUBDIRS_CONFIGURE macro
+autoreconf src/secp256k1 --install --force --warnings=all
