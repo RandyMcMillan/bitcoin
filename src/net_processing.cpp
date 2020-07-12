@@ -1722,7 +1722,7 @@ static CTransactionRef FindTxForGetData(const CTxMemPool& mempool, const CNode& 
     return {};
 }
 
-void static ProcessGetData(CNode& pfrom, const CChainParams& chainparams, CConnman& connman, CTxMemPool& mempool, const std::atomic<bool>& interruptMsgProc) LOCKS_EXCLUDED(cs_main)
+void static ProcessGetData(CNode& pfrom, const CChainParams& chainparams, CConnman& connman, CTxMemPool& mempool, const std::atomic<bool>& interruptMsgProc) EXCLUSIVE_LOCKS_REQUIRED(pfrom.cs_vRecv) LOCKS_EXCLUDED(cs_main)
 {
     AssertLockNotHeld(cs_main);
 
@@ -2756,8 +2756,11 @@ void PeerManager::ProcessMessage(CNode& pfrom, const std::string& msg_type, CDat
             LogPrint(BCLog::NET, "received getdata for: %s peer=%d\n", vInv[0].ToString(), pfrom.GetId());
         }
 
-        pfrom.vRecvGetData.insert(pfrom.vRecvGetData.end(), vInv.begin(), vInv.end());
-        ProcessGetData(pfrom, m_chainparams, m_connman, m_mempool, interruptMsgProc);
+        {
+            LOCK(pfrom.cs_vRecv);
+            pfrom.vRecvGetData.insert(pfrom.vRecvGetData.end(), vInv.begin(), vInv.end());
+            ProcessGetData(pfrom, m_chainparams, m_connman, m_mempool, interruptMsgProc);
+        }
         return;
     }
 
@@ -2865,7 +2868,7 @@ void PeerManager::ProcessMessage(CNode& pfrom, const std::string& msg_type, CDat
             CInv inv;
             inv.type = State(pfrom.GetId())->fWantsCmpctWitness ? MSG_WITNESS_BLOCK : MSG_BLOCK;
             inv.hash = req.blockhash;
-            pfrom.vRecvGetData.push_back(inv);
+            WITH_LOCK(pfrom.cs_vRecv, pfrom.vRecvGetData.push_back(inv));
             // The message processing loop will go around again (without pausing) and we'll respond then (without cs_main)
             return;
         }
@@ -3835,8 +3838,12 @@ bool PeerManager::ProcessMessages(CNode* pfrom, std::atomic<bool>& interruptMsgP
     //
     bool fMoreWork = false;
 
-    if (!pfrom->vRecvGetData.empty())
-        ProcessGetData(*pfrom, m_chainparams, m_connman, m_mempool, interruptMsgProc);
+    {
+        LOCK(pfrom->cs_vRecv);
+        if (!pfrom->vRecvGetData.empty()) {
+            ProcessGetData(*pfrom, m_chainparams, m_connman, m_mempool, interruptMsgProc);
+        }
+    }
 
     if (!pfrom->orphan_work_set.empty()) {
         std::list<CTransactionRef> removed_txn;
@@ -3852,7 +3859,10 @@ bool PeerManager::ProcessMessages(CNode* pfrom, std::atomic<bool>& interruptMsgP
 
     // this maintains the order of responses
     // and prevents vRecvGetData to grow unbounded
-    if (!pfrom->vRecvGetData.empty()) return true;
+    {
+        LOCK(pfrom->cs_vRecv);
+        if (!pfrom->vRecvGetData.empty()) return true;
+    }
     if (!pfrom->orphan_work_set.empty()) return true;
 
     // Don't bother if send buffer is too full to respond anyway
@@ -3904,8 +3914,10 @@ bool PeerManager::ProcessMessages(CNode* pfrom, std::atomic<bool>& interruptMsgP
         ProcessMessage(*pfrom, msg_type, vRecv, msg.m_time, interruptMsgProc);
         if (interruptMsgProc)
             return false;
-        if (!pfrom->vRecvGetData.empty())
-            fMoreWork = true;
+        {
+            LOCK(pfrom->cs_vRecv);
+            if (!pfrom->vRecvGetData.empty()) fMoreWork = true;
+        }
     } catch (const std::exception& e) {
         LogPrint(BCLog::NET, "%s(%s, %u bytes): Exception '%s' (%s) caught\n", __func__, SanitizeString(msg_type), nMessageSize, e.what(), typeid(e).name());
     } catch (...) {
