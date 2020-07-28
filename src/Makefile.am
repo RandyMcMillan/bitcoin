@@ -147,6 +147,7 @@ BITCOIN_CORE_H = \
   interfaces/chain.h \
   interfaces/handler.h \
   interfaces/node.h \
+  interfaces/txmempool.h \
   interfaces/wallet.h \
   key.h \
   key_io.h \
@@ -298,6 +299,7 @@ libbitcoin_server_a_SOURCES = \
   init.cpp \
   interfaces/chain.cpp \
   interfaces/node.cpp \
+  interfaces/txmempool.cpp \
   miner.cpp \
   net.cpp \
   net_processing.cpp \
