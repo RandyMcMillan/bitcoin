@@ -94,13 +94,19 @@ MACHO_ALLOWED_LIBRARIES = {
 'AppKit', # user interface
 'ApplicationServices', # common application tasks.
 'Carbon', # deprecated c back-compat API
+'ColorSync',
 'CoreFoundation', # low level func, data types
 'CoreGraphics', # 2D rendering
 'CoreServices', # operating system services
 'CoreText', # interface for laying out text and handling fonts.
+'CoreVideo',
 'Foundation', # base layer functionality for apps/frameworks
 'ImageIO', # read and write image file formats.
 'IOKit', # user-space access to hardware devices and drivers.
+'IOSurface',
+'Metal',
+'Security',
+'QuartzCore',
 'libobjc.A.dylib', # Objective-C runtime library
 }
 
