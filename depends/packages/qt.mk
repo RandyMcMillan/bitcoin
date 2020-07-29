@@ -1,22 +1,21 @@
 PACKAGE=qt
-$(package)_version=5.12.10
-$(package)_download_path=https://download.qt.io/official_releases/qt/5.12/$($(package)_version)/submodules
+$(package)_version=5.15.2
+$(package)_download_path=https://download.qt.io/official_releases/qt/5.15/$($(package)_version)/submodules
 $(package)_suffix=everywhere-src-$($(package)_version).tar.xz
 $(package)_file_name=qtbase-$($(package)_suffix)
-$(package)_sha256_hash=8088f174e6d28e779516c083b6087b6a9e3c8322b4bc161fd1b54195e3c86940
+$(package)_sha256_hash=909fad2591ee367993a75d7e2ea50ad4db332f05e1c38dd7a5a274e156a4e0f8
 $(package)_linux_dependencies=freetype fontconfig libxcb libxkbcommon libxcb_util libxcb_util_render libxcb_util_keysyms libxcb_util_image libxcb_util_wm
 $(package)_qt_libs=corelib network widgets gui plugins testlib
 $(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch no-xlib.patch
 $(package)_patches+= fix_android_qmake_conf.patch fix_android_jni_static.patch dont_hardcode_pwd.patch
 $(package)_patches+= drop_lrelease_dependency.patch no_sdk_version_check.patch
-$(package)_patches+= fix_lib_paths.patch fix_android_pch.patch
 $(package)_patches+= fix_bigsur_drawing.patch qtbase-moc-ignore-gcc-macro.patch
 
 $(package)_qttranslations_file_name=qttranslations-$($(package)_suffix)
-$(package)_qttranslations_sha256_hash=e1de58ed108b7e0a138815ea60fd46a2c4e1fc31396a707e5630e92de79c53de
+$(package)_qttranslations_sha256_hash=d5788e86257b21d5323f1efd94376a213e091d1e5e03b45a95dd052b5f570db8
 
 $(package)_qttools_file_name=qttools-$($(package)_suffix)
-$(package)_qttools_sha256_hash=b0cfa6e7aac41b7c61fc59acc04843d7a98f9e1840370611751bcfc1834a636c
+$(package)_qttools_sha256_hash=c189d0ce1ff7c739db9a3ace52ac3e24cb8fd6dbf234e49f075249b38f43c1cc
 
 $(package)_extra_sources  = $($(package)_qttranslations_file_name)
 $(package)_extra_sources += $($(package)_qttools_file_name)
@@ -27,13 +26,14 @@ $(package)_config_opts_release += -silent
 $(package)_config_opts_debug = -debug
 $(package)_config_opts_debug += -optimized-tools
 $(package)_config_opts += -bindir $(build_prefix)/bin
-$(package)_config_opts += -c++std c++1z
+$(package)_config_opts += -c++std c++17
 $(package)_config_opts += -confirm-license
 $(package)_config_opts += -hostprefix $(build_prefix)
 $(package)_config_opts += -no-compile-examples
 $(package)_config_opts += -no-cups
 $(package)_config_opts += -no-egl
 $(package)_config_opts += -no-eglfs
+$(package)_config_opts += -no-evdev
 $(package)_config_opts += -no-freetype
 $(package)_config_opts += -no-gif
 $(package)_config_opts += -no-glib
@@ -49,6 +49,7 @@ $(package)_config_opts += -no-mtdev
 $(package)_config_opts += -no-openssl
 $(package)_config_opts += -no-openvg
 $(package)_config_opts += -no-reduce-relocations
+$(package)_config_opts += -no-schannel
 $(package)_config_opts += -no-sctp
 $(package)_config_opts += -no-securetransport
 $(package)_config_opts += -no-sql-db2
@@ -62,6 +63,7 @@ $(package)_config_opts += -no-sql-sqlite
 $(package)_config_opts += -no-sql-sqlite2
 $(package)_config_opts += -no-system-proxies
 $(package)_config_opts += -no-use-gold-linker
+$(package)_config_opts += -no-zstd
 $(package)_config_opts += -nomake examples
 $(package)_config_opts += -nomake tests
 $(package)_config_opts += -opensource
@@ -98,6 +100,7 @@ $(package)_config_opts += -no-feature-sqlmodel
 $(package)_config_opts += -no-feature-statemachine
 $(package)_config_opts += -no-feature-syntaxhighlighter
 $(package)_config_opts += -no-feature-textbrowser
+$(package)_config_opts += -no-feature-textmarkdownwriter
 $(package)_config_opts += -no-feature-textodfwriter
 $(package)_config_opts += -no-feature-topleveldomain
 $(package)_config_opts += -no-feature-udpsocket
@@ -128,7 +131,7 @@ endif
 # for macOS on Apple Silicon (ARM) see https://bugreports.qt.io/browse/QTBUG-85279
 $(package)_config_opts_arm_darwin += -device-option QMAKE_APPLE_DEVICE_ARCHS=arm64
 
-$(package)_config_opts_linux = -qt-xcb
+$(package)_config_opts_linux = -xcb
 $(package)_config_opts_linux += -no-xcb-xlib
 $(package)_config_opts_linux += -no-feature-xlib
 $(package)_config_opts_linux += -system-freetype
@@ -225,10 +228,8 @@ define $(package)_preprocess_cmds
   patch -p1 -i $($(package)_patch_dir)/fix_no_printer.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_android_qmake_conf.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_android_jni_static.patch && \
-  patch -p1 -i $($(package)_patch_dir)/fix_android_pch.patch && \
   patch -p1 -i $($(package)_patch_dir)/no-xlib.patch && \
   patch -p1 -i $($(package)_patch_dir)/no_sdk_version_check.patch && \
-  patch -p1 -i $($(package)_patch_dir)/fix_lib_paths.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_bigsur_drawing.patch && \
   patch -p1 -i $($(package)_patch_dir)/qtbase-moc-ignore-gcc-macro.patch && \
   sed -i.old "s|updateqm.commands = \$$$$\$$$$LRELEASE|updateqm.commands = $($(package)_extract_dir)/qttools/bin/lrelease|" qttranslations/translations/translations.pro && \
