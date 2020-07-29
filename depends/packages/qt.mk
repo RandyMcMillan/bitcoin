@@ -1,9 +1,9 @@
 PACKAGE=qt
-$(package)_version=5.9.8
-$(package)_download_path=https://download.qt.io/official_releases/qt/5.9/$($(package)_version)/submodules
-$(package)_suffix=opensource-src-$($(package)_version).tar.xz
+$(package)_version=5.15.0
+$(package)_download_path=https://download.qt.io/official_releases/qt/5.15/$($(package)_version)/submodules
+$(package)_suffix=everywhere-src-$($(package)_version).tar.xz
 $(package)_file_name=qtbase-$($(package)_suffix)
-$(package)_sha256_hash=9b9dec1f67df1f94bce2955c5604de992d529dde72050239154c56352da0907d
+$(package)_sha256_hash=9e7af10aece15fa9500369efde69cb220eee8ec3a6818afe01ce1e7d484824c5
 $(package)_dependencies=zlib
 $(package)_linux_dependencies=freetype fontconfig libxcb libxkbcommon libxcb_util libxcb_util_render libxcb_util_keysyms libxcb_util_image libxcb_util_wm
 $(package)_build_subdir=qtbase
@@ -15,10 +15,10 @@ $(package)_patches+= freetype_back_compat.patch drop_lrelease_dependency.patch
 
 # Update OSX_QT_TRANSLATIONS when this is updated
 $(package)_qttranslations_file_name=qttranslations-$($(package)_suffix)
-$(package)_qttranslations_sha256_hash=fb5a47799754af73d3bf501fe513342cfe2fc37f64e80df5533f6110e804220c
+$(package)_qttranslations_sha256_hash=45c43268d9df50784d4d8ca345fce9288a1055fd074ac0ef508097f7aeba22fe
 
 $(package)_qttools_file_name=qttools-$($(package)_suffix)
-$(package)_qttools_sha256_hash=a97556eb7b2f30252cdd8a598c396cfce2b2f79d2bae883af6d3b26a2cdcc63c
+$(package)_qttools_sha256_hash=ddbcb49aab3a2e3672582c6e2e7bec0058feff790f67472343c79e2895e0e437
 
 $(package)_extra_sources  = $($(package)_qttranslations_file_name)
 $(package)_extra_sources += $($(package)_qttools_file_name)
@@ -27,13 +27,14 @@ define $(package)_set_vars
 $(package)_config_opts_release = -release
 $(package)_config_opts_debug = -debug
 $(package)_config_opts += -bindir $(build_prefix)/bin
-$(package)_config_opts += -c++std c++11
+$(package)_config_opts += -c++std c++17
 $(package)_config_opts += -confirm-license
 $(package)_config_opts += -hostprefix $(build_prefix)
 $(package)_config_opts += -no-compile-examples
 $(package)_config_opts += -no-cups
 $(package)_config_opts += -no-egl
 $(package)_config_opts += -no-eglfs
+$(package)_config_opts += -no-evdev
 $(package)_config_opts += -no-freetype
 $(package)_config_opts += -no-gif
 $(package)_config_opts += -no-glib
@@ -49,7 +50,7 @@ $(package)_config_opts += -no-mtdev
 $(package)_config_opts += -no-openssl
 $(package)_config_opts += -no-openvg
 $(package)_config_opts += -no-reduce-relocations
-$(package)_config_opts += -no-qml-debug
+$(package)_config_opts += -no-schannel
 $(package)_config_opts += -no-sctp
 $(package)_config_opts += -no-securetransport
 $(package)_config_opts += -no-sql-db2
@@ -63,11 +64,10 @@ $(package)_config_opts += -no-sql-sqlite
 $(package)_config_opts += -no-sql-sqlite2
 $(package)_config_opts += -no-system-proxies
 $(package)_config_opts += -no-use-gold-linker
-$(package)_config_opts += -no-xinput2
+$(package)_config_opts += -no-zstd
 $(package)_config_opts += -nomake examples
 $(package)_config_opts += -nomake tests
 $(package)_config_opts += -opensource
-$(package)_config_opts += -optimized-tools
 $(package)_config_opts += -pch
 $(package)_config_opts += -pkg-config
 $(package)_config_opts += -prefix $(host_prefix)
@@ -96,13 +96,14 @@ $(package)_config_opts += -no-feature-printdialog
 $(package)_config_opts += -no-feature-printer
 $(package)_config_opts += -no-feature-printpreviewdialog
 $(package)_config_opts += -no-feature-printpreviewwidget
-$(package)_config_opts += -no-feature-regularexpression
 $(package)_config_opts += -no-feature-sessionmanager
 $(package)_config_opts += -no-feature-socks5
 $(package)_config_opts += -no-feature-sql
+$(package)_config_opts += -no-feature-sqlmodel
 $(package)_config_opts += -no-feature-statemachine
 $(package)_config_opts += -no-feature-syntaxhighlighter
 $(package)_config_opts += -no-feature-textbrowser
+$(package)_config_opts += -no-feature-textmarkdownwriter
 $(package)_config_opts += -no-feature-textodfwriter
 $(package)_config_opts += -no-feature-topleveldomain
 $(package)_config_opts += -no-feature-udpsocket
@@ -116,18 +117,17 @@ $(package)_config_opts += -no-feature-xml
 
 $(package)_config_opts_darwin = -no-dbus
 $(package)_config_opts_darwin += -no-opengl
+$(package)_config_opts_darwin += -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=$(OSX_MIN_VERSION)
 
 ifneq ($(build_os),darwin)
 $(package)_config_opts_darwin += -xplatform macx-clang-linux
 $(package)_config_opts_darwin += -device-option MAC_SDK_PATH=$(OSX_SDK)
 $(package)_config_opts_darwin += -device-option MAC_SDK_VERSION=$(OSX_SDK_VERSION)
 $(package)_config_opts_darwin += -device-option CROSS_COMPILE="$(host)-"
-$(package)_config_opts_darwin += -device-option MAC_MIN_VERSION=$(OSX_MIN_VERSION)
 $(package)_config_opts_darwin += -device-option MAC_TARGET=$(host)
 endif
 
-$(package)_config_opts_linux  = -qt-xkbcommon-x11
-$(package)_config_opts_linux += -qt-xcb
+$(package)_config_opts_linux = -xcb
 $(package)_config_opts_linux += -no-xcb-xlib
 $(package)_config_opts_linux += -no-feature-xlib
 $(package)_config_opts_linux += -system-freetype
@@ -251,10 +251,7 @@ define $(package)_stage_cmds
   $(MAKE) -C src INSTALL_ROOT=$($(package)_staging_dir) $(addsuffix -install_subtargets,$(addprefix sub-,$($(package)_qt_libs))) && cd .. && \
   $(MAKE) -C qttools/src/linguist/lrelease INSTALL_ROOT=$($(package)_staging_dir) install_target && \
   $(MAKE) -C qttools/src/linguist/lupdate INSTALL_ROOT=$($(package)_staging_dir) install_target && \
-  $(MAKE) -C qttranslations INSTALL_ROOT=$($(package)_staging_dir) install_subtargets && \
-  if `test -f qtbase/src/plugins/platforms/xcb/xcb-static/libxcb-static.a`; then \
-    cp qtbase/src/plugins/platforms/xcb/xcb-static/libxcb-static.a $($(package)_staging_prefix_dir)/lib; \
-  fi
+  $(MAKE) -C qttranslations INSTALL_ROOT=$($(package)_staging_dir) install_subtargets
 endef
 
 define $(package)_postprocess_cmds
