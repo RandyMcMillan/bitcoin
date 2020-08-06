@@ -10,9 +10,10 @@
 #include <util/time.h>
 
 #include <atomic>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <ctime>
 #include <thread>
+#include <iomanip>
+#include <sstream>
 
 #include <tinyformat.h>
 
@@ -103,14 +104,13 @@ std::string FormatISO8601Date(int64_t nTime) {
 
 int64_t ParseISO8601DateTime(const std::string& str)
 {
-    static const boost::posix_time::ptime epoch = boost::posix_time::from_time_t(0);
-    static const std::locale loc(std::locale::classic(),
-        new boost::posix_time::time_input_facet("%Y-%m-%dT%H:%M:%SZ"));
+    struct tm ts = {};
+    static const std::locale loc(std::locale::classic());
     std::istringstream iss(str);
     iss.imbue(loc);
-    boost::posix_time::ptime ptime(boost::date_time::not_a_date_time);
-    iss >> ptime;
-    if (ptime.is_not_a_date_time() || epoch > ptime)
-        return 0;
-    return (ptime - epoch).total_seconds();
+    iss >> std::get_time(&ts, "%Y-%b-%dT%H:%M:%SZ");
+    //if (iss.fail()) return 0;
+    time_t time_val = timegm(&ts);
+    // if (time_val < 0) return 0;
+    return time_val;
 }
