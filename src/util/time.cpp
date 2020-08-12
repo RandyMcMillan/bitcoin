@@ -105,12 +105,22 @@ std::string FormatISO8601Date(int64_t nTime) {
 int64_t ParseISO8601DateTime(const std::string& str)
 {
     struct tm ts = {};
+    auto tz = getenv("TZ");
+    setenv("TZ", "", 1);
+    tzset();
     static const std::locale loc(std::locale::classic());
     std::istringstream iss(str);
     iss.imbue(loc);
     iss >> std::get_time(&ts, "%Y-%b-%dT%H:%M:%SZ");
     //if (iss.fail()) return 0;
-    time_t time_val = timegm(&ts);
-    // if (time_val < 0) return 0;
-    return time_val;
+    time_t ret = mktime(&ts);
+    if (tz) {
+        setenv("TZ", tz, 1);
+    } else {
+        unsetenv("TZ");
+    }
+    tzset();
+    std::cout << "ret: " << ret << "\n";
+    //if (ret < 0) return 0;
+    return ret;
 }
