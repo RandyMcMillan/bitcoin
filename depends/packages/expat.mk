@@ -1,12 +1,13 @@
 package=expat
-$(package)_version=2.2.7
-$(package)_download_path=https://github.com/libexpat/libexpat/releases/download/R_2_2_7/
-$(package)_file_name=$(package)-$($(package)_version).tar.bz2
-$(package)_sha256_hash=cbc9102f4a31a8dafd42d642e9a3aa31e79a0aedaa1f6efd2795ebc83174ec18
+$(package)_version=2.2.9
+$(package)_download_path=https://github.com/libexpat/libexpat/releases/download/R_2_2_9/
+$(package)_file_name=$(package)-$($(package)_version).tar.xz
+$(package)_sha256_hash=1ea6965b15c2106b6bbe883397271c80dfa0331cdf821b2c319591b55eadc0a4
 
 define $(package)_set_vars
   $(package)_config_opts=--disable-shared --without-docbook --without-tests --without-examples
-  $(package)_config_opts += --disable-dependency-tracking --enable-option-checking
+  $(package)_config_opts += --disable-dependency-tracking --without-xmlwf
+  $(package)_config_opts += --enable-option-checking
   $(package)_config_opts_linux=--with-pic
 endef
 
