@@ -76,8 +76,13 @@ void AssertLockNotHeldInternal(const char* pszName, const char* pszFile, int nLi
 inline void DeleteLock(void* cs) {}
 inline bool LockStackEmpty() { return true; }
 #endif
-#define AssertLockHeld(cs) AssertLockHeldInternal(#cs, __FILE__, __LINE__, &cs)
+#define AssertLockHeld(cs) AssertLockHeldInternal(#cs, __FILE__, __LINE__, cs)
 #define AssertLockNotHeld(cs) AssertLockNotHeldInternal(#cs, __FILE__, __LINE__, &cs)
+template <typename MutexType>
+void AssertLockHeldInternal(const char* name, const char* file, int line, MutexType& mtx) EXCLUSIVE_LOCKS_REQUIRED(mtx)
+{
+    AssertLockHeldInternal(name, file, line, &mtx);
+};
 
 /**
  * Template mixin that adds -Wthread-safety locking annotations and lock order
