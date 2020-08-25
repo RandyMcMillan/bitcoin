@@ -309,8 +309,8 @@ AC_DEFUN([_BITCOIN_QT_FIND_STATIC_PLUGINS],[
       PKG_CHECK_MODULES([QTFB], [Qt5FbSupport], [QT_LIBS="-lQt5FbSupport $QT_LIBS"])
       PKG_CHECK_MODULES([QTFONTDATABASE], [Qt5FontDatabaseSupport], [QT_LIBS="-lQt5FontDatabaseSupport $QT_LIBS"])
       PKG_CHECK_MODULES([QTTHEME], [Qt5ThemeSupport], [QT_LIBS="-lQt5ThemeSupport $QT_LIBS"])
-      PKG_CHECK_MODULES([QTSERVICE], [Qt5ServiceSupport], [QT_LIBS="-lQt5ServiceSupport $QT_LIBS"])
       if test "x$TARGET_OS" = xlinux; then
+        PKG_CHECK_MODULES([QTSERVICE], [Qt5ServiceSupport], [QT_LIBS="-lQt5ServiceSupport $QT_LIBS"])
         PKG_CHECK_MODULES([QTXCBQPA], [Qt5XcbQpa], [QT_LIBS="$QTXCBQPA_LIBS $QT_LIBS"])
       elif test "x$TARGET_OS" = xdarwin; then
         PKG_CHECK_MODULES([QTCLIPBOARD], [Qt5ClipboardSupport], [QT_LIBS="-lQt5ClipboardSupport $QT_LIBS"])
