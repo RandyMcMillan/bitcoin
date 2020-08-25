@@ -61,6 +61,9 @@ if [ -n "$DPKG_ADD_ARCH" ]; then
   DOCKER_EXEC dpkg --add-architecture "$DPKG_ADD_ARCH"
 fi
 
+if [ -n "$PREVIOUS_RELEASES_TO_DOWNLOAD" ]; then
+  DOCKER_PACKAGES="$DOCKER_PACKAGES gpg"
+fi
 if [[ $DOCKER_NAME_TAG == centos* ]]; then
   ${CI_RETRY_EXE} DOCKER_EXEC yum -y install epel-release
   ${CI_RETRY_EXE} DOCKER_EXEC yum -y install $DOCKER_PACKAGES $PACKAGES
