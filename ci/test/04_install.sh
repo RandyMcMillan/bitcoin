@@ -110,7 +110,7 @@ if [ "$USE_BUSY_BOX" = "true" ]; then
   # find excluded for now because it does not recognize the -delete option in ./depends (fixed in later BusyBox version)
   # ar excluded for now because it does not recognize the -q option in ./depends (unknown if fixed)
   # shellcheck disable=SC1010
-  DOCKER_EXEC for util in \$\(busybox --list \| grep -v "^ar$" \| grep -v "^tar$" \| grep -v "^find$"\)\; do ln -s \$\(command -v busybox\) $BASE_SCRATCH_DIR/bins/\$util\; done
+  DOCKER_EXEC for util in \$\(busybox --list \| grep -v "^ar$" \| grep -v "^tar$" \| grep -v "^find$" \| grep -v "^patch$"\)\; do ln -s \$\(command -v busybox\) $BASE_SCRATCH_DIR/bins/\$util\; done
   # Print BusyBox version
-  DOCKER_EXEC patch --help
+  DOCKER_EXEC "busybox | head -n 1"
 fi
