@@ -3845,12 +3845,14 @@ bool PeerManager::ProcessMessages(CNode* pfrom, std::atomic<bool>& interruptMsgP
         }
     }
 
-    if (!pfrom->orphan_work_set.empty()) {
-        std::list<CTransactionRef> removed_txn;
+    {
         LOCK2(cs_main, g_cs_orphans);
-        ProcessOrphanTx(pfrom->orphan_work_set, removed_txn);
-        for (const CTransactionRef& removedTx : removed_txn) {
-            AddToCompactExtraTransactions(removedTx);
+        if (!pfrom->orphan_work_set.empty()) {
+            std::list<CTransactionRef> removed_txn;
+            ProcessOrphanTx(pfrom->orphan_work_set, removed_txn);
+            for (const CTransactionRef& removedTx : removed_txn) {
+                AddToCompactExtraTransactions(removedTx);
+            }
         }
     }
 
@@ -3863,7 +3865,10 @@ bool PeerManager::ProcessMessages(CNode* pfrom, std::atomic<bool>& interruptMsgP
         LOCK(pfrom->cs_vRecv);
         if (!pfrom->vRecvGetData.empty()) return true;
     }
-    if (!pfrom->orphan_work_set.empty()) return true;
+    {
+        LOCK2(cs_main, g_cs_orphans);
+        if (!pfrom->orphan_work_set.empty()) return true;
+    }
 
     // Don't bother if send buffer is too full to respond anyway
     if (pfrom->fPauseSend)

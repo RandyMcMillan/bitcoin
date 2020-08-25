@@ -647,6 +647,7 @@ struct LocalServiceInfo {
     int nPort;
 };
 
+extern RecursiveMutex g_cs_orphans;
 extern RecursiveMutex cs_mapLocalHost;
 extern std::map<CNetAddr, LocalServiceInfo> mapLocalHost GUARDED_BY(cs_mapLocalHost);
 
@@ -1003,7 +1004,7 @@ public:
     // Whether a ping is requested.
     std::atomic<bool> fPingQueued{false};
 
-    std::set<uint256> orphan_work_set;
+    std::set<uint256> orphan_work_set GUARDED_BY(g_cs_orphans);
 
     CNode(NodeId id, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn, SOCKET hSocketIn, const CAddress &addrIn, uint64_t nKeyedNetGroupIn, uint64_t nLocalHostNonceIn, const CAddress &addrBindIn, const std::string &addrNameIn, ConnectionType conn_type_in);
     ~CNode();
