@@ -10,7 +10,7 @@ $(package)_build_subdir=qtbase
 $(package)_qt_libs=corelib network widgets gui plugins testlib
 $(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch no-xlib.patch
 $(package)_patches+= fix_android_jni_static.patch dont_hardcode_pwd.patch
-$(package)_patches+= freetype_back_compat.patch drop_lrelease_dependency.patch
+$(package)_patches+= drop_lrelease_dependency.patch
 
 # Update OSX_QT_TRANSLATIONS when this is updated
 $(package)_qttranslations_file_name=qttranslations-$($(package)_suffix)
@@ -192,7 +192,6 @@ define $(package)_extract_cmds
 endef
 
 define $(package)_preprocess_cmds
-  patch -p1 -i $($(package)_patch_dir)/freetype_back_compat.patch && \
   sed -i.old "s|updateqm.commands = \$$$$\$$$$LRELEASE|updateqm.commands = $($(package)_extract_dir)/qttools/bin/lrelease|" qttranslations/translations/translations.pro && \
   patch -p1 -i $($(package)_patch_dir)/drop_lrelease_dependency.patch && \
   patch -p1 -i $($(package)_patch_dir)/dont_hardcode_pwd.patch &&\
