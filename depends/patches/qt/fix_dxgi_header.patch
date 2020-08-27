@@ -1,0 +1,11 @@
+--- a/qtbase/src/gui/rhi/qrhid3d11_p_p.h
++++ b/qtbase/src/gui/rhi/qrhid3d11_p_p.h
+@@ -54,7 +54,7 @@
+ #include <QWindow>
+ 
+ #include <d3d11_1.h>
+-#include <dxgi1_3.h>
++#include <dxgi.h>
+ 
+ QT_BEGIN_NAMESPACE
+ 
