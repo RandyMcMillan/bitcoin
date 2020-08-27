@@ -14,11 +14,11 @@ $(package)_clang_file_name=clang-llvm-$($(package)_clang_version)-x86_64-linux-g
 $(package)_clang_sha256_hash=9ef854b71949f825362a119bf2597f744836cb571131ae6b721cd102ffea8cd0
 endif
 
-$(package)_libtapi_version=3efb201881e7a76a21e0554906cf306432539cef
+$(package)_libtapi_version=664b8414f89612f2dfd35a9b679c345aa5389026
 $(package)_libtapi_download_path=https://github.com/tpoechtrager/apple-libtapi/archive
 $(package)_libtapi_download_file=$($(package)_libtapi_version).tar.gz
 $(package)_libtapi_file_name=$($(package)_libtapi_version).tar.gz
-$(package)_libtapi_sha256_hash=380c1ca37cfa04a8699d0887a8d3ee1ad27f3d08baba78887c73b09485c0fbd3
+$(package)_libtapi_sha256_hash=62e419c12d1c9fad67cc1cd523132bc00db050998337c734c15bc8d73cc02b61
 
 $(package)_extra_sources=$($(package)_libtapi_file_name)
 ifeq ($(strip $(FORCE_USE_SYSTEM_CLANG)),)
@@ -96,7 +96,7 @@ define $(package)_stage_cmds
   $(MAKE) DESTDIR=$($(package)_staging_dir) install && \
   mkdir -p $($(package)_staging_prefix_dir)/lib/ && \
   cd $($(package)_extract_dir) && \
-  cp lib/libtapi.so.6 $($(package)_staging_prefix_dir)/lib/ && \
+  cp lib/libtapi.so.8svn $($(package)_staging_prefix_dir)/lib/ && \
   cd $($(package)_extract_dir)/toolchain && \
   mkdir -p $($(package)_staging_prefix_dir)/lib/clang/$($(package)_clang_version)/include && \
   mkdir -p $($(package)_staging_prefix_dir)/bin $($(package)_staging_prefix_dir)/include && \
@@ -111,6 +111,6 @@ define $(package)_stage_cmds
   $(MAKE) DESTDIR=$($(package)_staging_dir) install && \
   mkdir -p $($(package)_staging_prefix_dir)/lib/ && \
   cd $($(package)_extract_dir) && \
-  cp lib/libtapi.so.6 $($(package)_staging_prefix_dir)/lib/
+  cp lib/libtapi.so.8svn $($(package)_staging_prefix_dir)/lib/
 endef
 endif
