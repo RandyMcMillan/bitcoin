@@ -347,6 +347,7 @@ public:
     }
     WalletBalances getBalances() override
     {
+        LOCK(m_wallet->cs_wallet);
         const auto bal = m_wallet->GetBalance();
         WalletBalances result;
         result.balance = bal.m_mine_trusted;
@@ -370,7 +371,11 @@ public:
         balances = getBalances();
         return true;
     }
-    CAmount getBalance() override { return m_wallet->GetBalance().m_mine_trusted; }
+    CAmount getBalance() override
+    {
+        LOCK(m_wallet->cs_wallet);
+        return m_wallet->GetBalance().m_mine_trusted;
+    }
     CAmount getAvailableBalance(const CCoinControl& coin_control) override
     {
         return m_wallet->GetAvailableBalance(&coin_control);

@@ -2078,10 +2078,9 @@ void MaybeResendWalletTxs()
 
 CWallet::Balance CWallet::GetBalance(const int min_depth, bool avoid_reuse) const
 {
+    AssertLockHeld(cs_wallet);
     Balance ret;
     isminefilter reuse_filter = avoid_reuse ? ISMINE_NO : ISMINE_USED;
-    {
-        LOCK(cs_wallet);
         std::set<uint256> trusted_parents;
         for (const auto& entry : mapWallet)
         {
@@ -2101,7 +2100,6 @@ CWallet::Balance CWallet::GetBalance(const int min_depth, bool avoid_reuse) cons
             ret.m_mine_immature += wtx.GetImmatureCredit();
             ret.m_watchonly_immature += wtx.GetImmatureWatchOnlyCredit();
         }
-    }
     return ret;
 }
 
