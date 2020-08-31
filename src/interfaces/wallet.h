@@ -11,6 +11,7 @@
 #include <support/allocators/secure.h> // For SecureString
 #include <util/message.h>
 #include <util/ui_change_type.h>
+#include <wallet/wallet.h>
 
 #include <functional>
 #include <map>
@@ -24,7 +25,6 @@
 class CCoinControl;
 class CFeeRate;
 class CKey;
-class CWallet;
 enum class FeeReason;
 enum class OutputType;
 enum class TransactionError;
@@ -298,7 +298,8 @@ public:
     virtual std::unique_ptr<Handler> handleCanGetAddressesChanged(CanGetAddressesChangedFn fn) = 0;
 
     //! Return pointer to internal wallet class, useful for testing.
-    virtual CWallet* wallet() { return nullptr; }
+    virtual CWallet* wallet() = 0;
+    virtual RecursiveMutex* mutex() LOCK_RETURNED(wallet()->cs_wallet) = 0;
 };
 
 //! Information about one wallet address.
@@ -374,6 +375,118 @@ struct WalletTxOut
     int depth_in_main_chain = -1;
     bool is_spent = false;
 };
+
+class WalletImpl : public Wallet
+{
+public:
+    explicit WalletImpl(const std::shared_ptr<CWallet>& wallet);
+
+    bool encryptWallet(const SecureString& wallet_passphrase) override;
+    bool isCrypted() override;
+    bool lock() override;
+    bool unlock(const SecureString& wallet_passphrase) override;
+    bool isLocked() override;
+    bool changeWalletPassphrase(const SecureString& old_wallet_passphrase,
+        const SecureString& new_wallet_passphrase) override;
+    void abortRescan() override;
+    bool backupWallet(const std::string& filename) override;
+    std::string getWalletName() override;
+    bool getNewDestination(const OutputType type, const std::string label, CTxDestination& dest) override;
+    bool getPubKey(const CScript& script, const CKeyID& address, CPubKey& pub_key) override;
+    SigningResult signMessage(const std::string& message, const PKHash& pkhash, std::string& str_sig) override;
+    bool isSpendable(const CTxDestination& dest) override;
+    bool haveWatchOnly() override;
+    bool setAddressBook(const CTxDestination& dest, const std::string& name, const std::string& purpose) override;
+    bool delAddressBook(const CTxDestination& dest) override;
+    bool getAddress(const CTxDestination& dest,
+        std::string* name,
+        isminetype* is_mine,
+        std::string* purpose) override;
+    std::vector<WalletAddress> getAddresses() override;
+    bool addDestData(const CTxDestination& dest, const std::string& key, const std::string& value) override;
+    bool eraseDestData(const CTxDestination& dest, const std::string& key) override;
+    std::vector<std::string> getDestValues(const std::string& prefix) override;
+    void lockCoin(const COutPoint& output) override;
+    void unlockCoin(const COutPoint& output) override;
+    bool isLockedCoin(const COutPoint& output) override;
+    void listLockedCoins(std::vector<COutPoint>& outputs) override;
+    CTransactionRef createTransaction(const std::vector<CRecipient>& recipients,
+        const CCoinControl& coin_control,
+        bool sign,
+        int& change_pos,
+        CAmount& fee,
+        bilingual_str& fail_reason) override;
+    void commitTransaction(CTransactionRef tx,
+        WalletValueMap value_map,
+        WalletOrderForm order_form) override;
+    bool transactionCanBeAbandoned(const uint256& txid) override;
+    bool abandonTransaction(const uint256& txid) override;
+    bool transactionCanBeBumped(const uint256& txid) override;
+    bool createBumpTransaction(const uint256& txid,
+        const CCoinControl& coin_control,
+        std::vector<bilingual_str>& errors,
+        CAmount& old_fee,
+        CAmount& new_fee,
+        CMutableTransaction& mtx) override;
+    bool signBumpTransaction(CMutableTransaction& mtx) override;
+    bool commitBumpTransaction(const uint256& txid,
+        CMutableTransaction&& mtx,
+        std::vector<bilingual_str>& errors,
+        uint256& bumped_txid) override;
+    CTransactionRef getTx(const uint256& txid) override;
+    WalletTx getWalletTx(const uint256& txid) override;
+    std::vector<WalletTx> getWalletTxs() override;
+    bool tryGetTxStatus(const uint256& txid,
+        interfaces::WalletTxStatus& tx_status,
+        int& num_blocks,
+        int64_t& block_time) override;
+    WalletTx getWalletTxDetails(const uint256& txid,
+        WalletTxStatus& tx_status,
+        WalletOrderForm& order_form,
+        bool& in_mempool,
+        int& num_blocks) override;
+    TransactionError fillPSBT(int sighash_type,
+        bool sign,
+        bool bip32derivs,
+        PartiallySignedTransaction& psbtx,
+        bool& complete,
+        size_t* n_signed) override;
+    WalletBalances getBalances() override;
+    bool tryGetBalances(WalletBalances& balances, uint256& block_hash) override;
+    CAmount getBalance() override;
+    CAmount getAvailableBalance(const CCoinControl& coin_control) override;
+    isminetype txinIsMine(const CTxIn& txin) override;
+    isminetype txoutIsMine(const CTxOut& txout) override;
+    CAmount getDebit(const CTxIn& txin, isminefilter filter) override;
+    CAmount getCredit(const CTxOut& txout, isminefilter filter) override;
+    CoinsList listCoins() override;
+    std::vector<WalletTxOut> getCoins(const std::vector<COutPoint>& outputs) override;
+    CAmount getRequiredFee(unsigned int tx_bytes) override;
+    CAmount getMinimumFee(unsigned int tx_bytes,
+        const CCoinControl& coin_control,
+        int* returned_target,
+        FeeReason* reason) override;
+    unsigned int getConfirmTarget() override;
+    bool hdEnabled() override;
+    bool canGetAddresses() override;
+    bool privateKeysDisabled() override;
+    OutputType getDefaultAddressType() override;
+    CAmount getDefaultMaxTxFee() override;
+    void remove() override;
+    bool isLegacy() override;
+    std::unique_ptr<Handler> handleUnload(UnloadFn fn) override;
+    std::unique_ptr<Handler> handleShowProgress(ShowProgressFn fn) override;
+    std::unique_ptr<Handler> handleStatusChanged(StatusChangedFn fn) override;
+    std::unique_ptr<Handler> handleAddressBookChanged(AddressBookChangedFn fn) override;
+    std::unique_ptr<Handler> handleTransactionChanged(TransactionChangedFn fn) override;
+    std::unique_ptr<Handler> handleWatchOnlyChanged(WatchOnlyChangedFn fn) override;
+    std::unique_ptr<Handler> handleCanGetAddressesChanged(CanGetAddressesChangedFn fn) override;
+    CWallet* wallet() override;
+    RecursiveMutex* mutex() override LOCK_RETURNED(wallet()->cs_wallet) { return &wallet()->cs_wallet; }
+
+    std::shared_ptr<CWallet> m_wallet;
+};
+
 
 //! Return implementation of Wallet interface. This function is defined in
 //! dummywallet.cpp and throws if the wallet component is not compiled.
