@@ -176,6 +176,7 @@ void TestGUI(interfaces::Node& node)
         QLabel* balanceLabel = sendCoinsDialog.findChild<QLabel*>("labelBalance");
         QString balanceText = balanceLabel->text();
         int unit = walletModel.getOptionsModel()->getDisplayUnit();
+        LOCK(walletModel.wallet().wallet()->cs_wallet);
         CAmount balance = walletModel.wallet().getBalance();
         QString balanceComparison = BitcoinUnits::formatWithUnit(unit, balance, false, BitcoinUnits::SeparatorStyle::ALWAYS);
         QCOMPARE(balanceText, balanceComparison);
