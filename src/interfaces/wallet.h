@@ -207,7 +207,7 @@ public:
     virtual bool tryGetBalances(WalletBalances& balances, uint256& block_hash) = 0;
 
     //! Get balance.
-    virtual CAmount getBalance() = 0;
+    virtual CAmount getBalance() EXCLUSIVE_LOCKS_REQUIRED(!mutex()) = 0;
 
     //! Get available balance.
     virtual CAmount getAvailableBalance(const CCoinControl& coin_control) = 0;
@@ -453,7 +453,7 @@ public:
         size_t* n_signed) override;
     WalletBalances getBalances() override;
     bool tryGetBalances(WalletBalances& balances, uint256& block_hash) override;
-    CAmount getBalance() override;
+    CAmount getBalance() override EXCLUSIVE_LOCKS_REQUIRED(!mutex());
     CAmount getAvailableBalance(const CCoinControl& coin_control) override;
     isminetype txinIsMine(const CTxIn& txin) override;
     isminetype txoutIsMine(const CTxOut& txout) override;
