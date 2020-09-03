@@ -12,6 +12,10 @@ $(package)_build_opts_mingw32=-f Makefile.mingw
 $(package)_build_env+=CFLAGS="$($(package)_cflags) $($(package)_cppflags)" AR="$($(package)_ar)"
 endef
 
+# sed is used here to replace the host and version that will end up as part of
+# the miniupnpc User-Agent string, that will ultimately end up in bitcoind. i.e
+# before: User-Agent: Debian/10, UPnP/1.1, MiniUPnPc/2.0
+# after : User-Agent: x86_64-pc-linux-gnu, UPnP/1.1, MiniUPnPc/2.0.20180203
 define $(package)_preprocess_cmds
   mkdir dll && \
   sed -e 's|MINIUPNPC_VERSION_STRING \"version\"|MINIUPNPC_VERSION_STRING \"$($(package)_version)\"|' -e 's|OS/version|$(host)|' miniupnpcstrings.h.in > miniupnpcstrings.h && \
