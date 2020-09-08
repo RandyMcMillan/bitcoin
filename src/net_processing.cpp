@@ -1722,7 +1722,8 @@ static CTransactionRef FindTxForGetData(const CTxMemPool& mempool, const CNode& 
     return {};
 }
 
-void static ProcessGetData(CNode& pfrom, const CChainParams& chainparams, CConnman& connman, CTxMemPool& mempool, const std::atomic<bool>& interruptMsgProc) EXCLUSIVE_LOCKS_REQUIRED(pfrom.cs_vRecv) LOCKS_EXCLUDED(cs_main)
+static void ProcessGetData(CNode& pfrom, const CChainParams& chainparams, CConnman& connman, CTxMemPool& mempool, const std::atomic<bool>& interruptMsgProc)
+    EXCLUSIVE_LOCKS_REQUIRED(!cs_main, pfrom.cs_vRecv)
 {
     AssertLockNotHeld(cs_main);
 
@@ -2848,15 +2849,25 @@ void PeerManager::ProcessMessage(CNode& pfrom, const std::string& msg_type, CDat
             return;
         }
 
-        LOCK(cs_main);
+        CInv inv;
+        {
+            LOCK(cs_main);
 
-        const CBlockIndex* pindex = LookupBlockIndex(req.blockhash);
-        if (!pindex || !(pindex->nStatus & BLOCK_HAVE_DATA)) {
-            LogPrint(BCLog::NET, "Peer %d sent us a getblocktxn for a block we don't have\n", pfrom.GetId());
-            return;
-        }
+            const CBlockIndex* pindex = LookupBlockIndex(req.blockhash);
+            if (!pindex || !(pindex->nStatus & BLOCK_HAVE_DATA)) {
+                LogPrint(BCLog::NET, "Peer %d sent us a getblocktxn for a block we don't have\n", pfrom.GetId());
+                return;
+            }
 
-        if (pindex->nHeight < ::ChainActive().Height() - MAX_BLOCKTXN_DEPTH) {
+            if (pindex->nHeight >= ::ChainActive().Height() - MAX_BLOCKTXN_DEPTH) {
+                CBlock block;
+                bool ret = ReadBlockFromDisk(block, pindex, m_chainparams.GetConsensus());
+                assert(ret);
+
+                SendBlockTransactions(pfrom, block, req);
+                return;
+            }
+
             // If an older block is requested (should never happen in practice,
             // but can happen in tests) send a block response instead of a
             // blocktxn response. Sending a full block response instead of a
@@ -2865,19 +2876,12 @@ void PeerManager::ProcessMessage(CNode& pfrom, const std::string& msg_type, CDat
             // expensive disk reads, because it will require the peer to
             // actually receive all the data read from disk over the network.
             LogPrint(BCLog::NET, "Peer %d sent us a getblocktxn for a block > %i deep\n", pfrom.GetId(), MAX_BLOCKTXN_DEPTH);
-            CInv inv;
             inv.type = State(pfrom.GetId())->fWantsCmpctWitness ? MSG_WITNESS_BLOCK : MSG_BLOCK;
             inv.hash = req.blockhash;
-            WITH_LOCK(pfrom.cs_vRecv, pfrom.vRecvGetData.push_back(inv));
-            // The message processing loop will go around again (without pausing) and we'll respond then (without cs_main)
-            return;
         }
 
-        CBlock block;
-        bool ret = ReadBlockFromDisk(block, pindex, m_chainparams.GetConsensus());
-        assert(ret);
-
-        SendBlockTransactions(pfrom, block, req);
+        LOCK(pfrom.cs_vRecv);
+        pfrom.vRecvGetData.push_back(inv);
         return;
     }
 
