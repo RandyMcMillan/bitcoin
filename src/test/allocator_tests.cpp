@@ -274,4 +274,49 @@ BOOST_AUTO_TEST_CASE(accounting_allocation_test)
     BOOST_CHECK(dummy == 0);
 }
 
+BOOST_AUTO_TEST_CASE(accounting_allocation_map_test)
+{
+    size_t total = 0;
+    size_t dummy = 0;
+
+    {
+        using AllocatorType = memusage::AccountingAllocator<std::pair<const int, int>>;
+        using AccountingAllocationMap = std::map<int, int, std::less<int>, AllocatorType>;
+
+        AllocatorType dummy_allocator{dummy};
+        // map1 is accounted for in 'dummy'.
+        AccountingAllocationMap map1{dummy_allocator};
+        map1.emplace(6, 6);
+        {
+            AllocatorType total_allocator{total};
+            // map2 is accounted for in 'total'.
+            AccountingAllocationMap map2{total_allocator};
+            map2.emplace(5, 5);
+            map2.emplace(2, 2);
+            map2.emplace(3, 3);
+            map1.erase(2);
+            BOOST_CHECK(total > 0);
+            const size_t old = total;
+            map1 = std::move(map2); // map1 is now accounted for in 'total'.
+            BOOST_CHECK_EQUAL(total, old);
+        }
+        map1.erase(5);
+        const size_t cached = total;
+        BOOST_CHECK(cached > 0);
+        {
+            auto map3 = map1; // map3 is a copy of map1, and this copy is unaccounted.
+            BOOST_CHECK_EQUAL(total, cached);
+            map3.emplace(4, 4);
+            BOOST_CHECK_EQUAL(total, cached);
+            map3.erase(3);
+            BOOST_CHECK_EQUAL(total, cached);
+        }
+        BOOST_CHECK_EQUAL(total, cached);
+    }
+
+    // After all objects using 'total' are gone, its value must go back to 0.
+    BOOST_CHECK(total == 0);
+    BOOST_CHECK(dummy == 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
