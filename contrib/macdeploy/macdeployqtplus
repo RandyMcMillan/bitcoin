@@ -513,7 +513,7 @@ ap = ArgumentParser(description="""Improved version of macdeployqt.
 Outputs a ready-to-deploy app in a folder "dist" and optionally wraps it in a .dmg file.
 Note, that the "dist" folder will be deleted before deploying on each run.
 
-Optionally, Qt translation files (.qm) and additional resources can be added to the bundle.
+Optionally, Qt translation files (.qm) can be added to the bundle.
 
 Also optionally signs the .app bundle; set the CODESIGNARGS environment variable to pass arguments
 to the codesign tool.
@@ -528,7 +528,6 @@ ap.add_argument("-dmg", nargs="?", const="", metavar="basename", help="create a 
 ap.add_argument("-fancy", nargs=1, metavar="plist", default=[], help="make a fancy looking disk image using the given plist file with instructions; requires -dmg to work")
 ap.add_argument("-add-qt-tr", nargs=1, metavar="languages", default=[], help="add Qt translation files to the bundle's resources; the language list must be separated with commas, not with whitespace")
 ap.add_argument("-translations-dir", nargs=1, metavar="path", default=None, help="Path to Qt's translation files")
-ap.add_argument("-add-resources", nargs="+", metavar="path", default=[], help="list of additional files or folders to be copied into the bundle's resources; must be the last argument")
 ap.add_argument("-volname", nargs=1, metavar="volname", default=[], help="custom volume name for dmg")
 
 config = ap.parse_args()
@@ -555,16 +554,6 @@ if config.translations_dir and config.translations_dir[0]:
         if verbose >= 1:
             sys.stderr.write("Error: Could not find translation dir \"{}\"\n".format(translations_dir))
         sys.exit(1)
-# ------------------------------------------------
-
-for p in config.add_resources:
-    if verbose >= 3:
-        print("Checking for \"%s\"..." % p)
-    if not os.path.exists(p):
-        if verbose >= 1:
-            sys.stderr.write("Error: Could not find additional resource file \"{}\"\n".format(p))
-        sys.exit(1)
-
 # ------------------------------------------------
 
 if len(config.fancy) == 1:
@@ -722,20 +711,6 @@ for lng_file in add_qt_tr:
     if verbose >= 3:
         print(os.path.join(qt_tr_dir, lng_file), "->", os.path.join(applicationBundle.resourcesPath, lng_file))
     shutil.copy2(os.path.join(qt_tr_dir, lng_file), os.path.join(applicationBundle.resourcesPath, lng_file))
-
-# ------------------------------------------------
-
-if len(config.add_resources) > 0 and verbose >= 2:
-    print("+ Adding additional resources +")
-
-for p in config.add_resources:
-    t = os.path.join(applicationBundle.resourcesPath, os.path.basename(p))
-    if verbose >= 3:
-        print(p, "->", t)
-    if os.path.isdir(p):
-        shutil.copytree(p, t, symlinks=True)
-    else:
-        shutil.copy2(p, t)
 
 # ------------------------------------------------
 
