@@ -2678,6 +2678,7 @@ void ProcessMessage(
                     pfrom.fDisconnect = true;
                     return;
                 } else if (!fAlreadyHave && !chainman.ActiveChainstate().IsInitialBlockDownload()) {
+                    LogPrint(BCLog::NET, "CRASH: received (%s) inv from peer=%d\n", inv.hash.ToString(), pfrom.GetId());
                     RequestTx(State(pfrom.GetId()), ToGenTxid(inv), current_time);
                 }
             }
