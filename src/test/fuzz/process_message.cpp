@@ -16,6 +16,7 @@
 #include <test/util/mining.h>
 #include <test/util/net.h>
 #include <test/util/setup_common.h>
+#include <test/util/validation.h>
 #include <util/memory.h>
 #include <validationinterface.h>
 #include <version.h>
@@ -75,10 +76,14 @@ void test_one_input(const std::vector<uint8_t>& buffer)
 {
     FuzzedDataProvider fuzzed_data_provider(buffer.data(), buffer.size());
     ConnmanTestMsg& connman = *(ConnmanTestMsg*)g_setup->m_node.connman.get();
+    TestChainState& chainstate = *(TestChainState*)&g_setup->m_node.chainman->ActiveChainstate();
+    chainstate.ResetIbd();
     const std::string random_message_type{fuzzed_data_provider.ConsumeBytesAsString(CMessageHeader::COMMAND_SIZE).c_str()};
     if (!LIMIT_TO_MESSAGE_TYPE.empty() && random_message_type != LIMIT_TO_MESSAGE_TYPE) {
         return;
     }
+    const bool jump_out_of_ibd{fuzzed_data_provider.ConsumeBool()};
+    if (jump_out_of_ibd) chainstate.JumpOutOfIbd();
     CDataStream random_bytes_data_stream{fuzzed_data_provider.ConsumeRemainingBytes<unsigned char>(), SER_NETWORK, PROTOCOL_VERSION};
     CNode& p2p_node = *MakeUnique<CNode>(0, ServiceFlags(NODE_NETWORK | NODE_WITNESS | NODE_BLOOM), 0, INVALID_SOCKET, CAddress{CService{in_addr{0x0100007f}, 7777}, NODE_NETWORK}, 0, 0, CAddress{}, std::string{}, false).release();
     p2p_node.fSuccessfullyConnected = true;
