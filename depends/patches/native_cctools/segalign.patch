@@ -1,0 +1,27 @@
+commit 75d6c915d3ae6f04fa1333d858f269d8f872e9e3
+Author: fanquake <fanquake@gmail.com>
+Date:   Tue Dec 22 16:23:24 2020 +0800
+
+    Make cctools_port's codesign_allocate compatible with Apple's
+    
+    This is a backport of the cctools patch added in #20644 (a4118c6)
+    that is compatible with the older version of cctools used in the 0.20
+    branch.
+
+diff --git a/cctools/libstuff/arch.c b/cctools/libstuff/arch.c
+index 98402d6..3f6133b 100644
+--- a/cctools/libstuff/arch.c
++++ b/cctools/libstuff/arch.c
+@@ -356,9 +356,10 @@ const struct arch_flag *flag)
+ 	if(flag->cputype == CPU_TYPE_POWERPC ||
+ 	   flag->cputype == CPU_TYPE_POWERPC64 ||
+ 	   flag->cputype == CPU_TYPE_VEO ||
+-	   flag->cputype == CPU_TYPE_I386 ||
+-	   flag->cputype == CPU_TYPE_X86_64)
++	   flag->cputype == CPU_TYPE_I386)
+ 	    return(0x1000); /* 4K */
++        /* CPU_TYPE_X86_64 used to be 0x1000; */
++        /* Changed to 0x2000 to match Apple's distributed codesign_allocate. */
+ 	else
+ 	    return(0x2000); /* 8K */
+ }
