@@ -896,7 +896,6 @@ int nMaxConnections;
 int nUserMaxConnections;
 int nFD;
 ServiceFlags nLocalServices = ServiceFlags(NODE_NETWORK | NODE_NETWORK_LIMITED);
-int64_t peer_connect_timeout;
 std::set<BlockFilterType> g_enabled_filter_types;
 
 } // namespace
@@ -1138,8 +1137,7 @@ bool AppInitParameterInteraction(const ArgsManager& args)
         nConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
     }
 
-    peer_connect_timeout = args.GetArg("-peertimeout", DEFAULT_PEER_CONNECT_TIMEOUT);
-    if (peer_connect_timeout <= 0) {
+    if (args.GetArg("-peertimeout", DEFAULT_PEER_CONNECT_TIMEOUT) <= 0) {
         return InitError(Untranslated("peertimeout cannot be configured with a negative value."));
     }
 
@@ -1928,7 +1926,6 @@ bool AppInitMain(const util::Ref& context, NodeContext& node, interfaces::BlockA
     connOptions.m_added_nodes = args.GetArgs("-addnode");
 
     connOptions.nMaxOutboundLimit = 1024 * 1024 * args.GetArg("-maxuploadtarget", DEFAULT_MAX_UPLOAD_TARGET);
-    connOptions.m_peer_connect_timeout = peer_connect_timeout;
 
     for (const std::string& bind_arg : args.GetArgs("-bind")) {
         CService bind_addr;

@@ -74,7 +74,7 @@ static constexpr uint64_t DEFAULT_MAX_UPLOAD_TARGET = 0;
 /** Default for blocks only*/
 static const bool DEFAULT_BLOCKSONLY = false;
 /** -peertimeout default */
-static const int64_t DEFAULT_PEER_CONNECT_TIMEOUT = 60;
+static constexpr int64_t DEFAULT_PEER_CONNECT_TIMEOUT = 60;
 
 static const bool DEFAULT_FORCEDNSSEED = false;
 static const size_t DEFAULT_MAXRECEIVEBUFFER = 5 * 1000;
@@ -817,7 +817,6 @@ public:
         unsigned int nSendBufferMaxSize = 0;
         unsigned int nReceiveFloodSize = 0;
         uint64_t nMaxOutboundLimit = 0;
-        int64_t m_peer_connect_timeout = DEFAULT_PEER_CONNECT_TIMEOUT;
         std::vector<std::string> vSeedNodes;
         std::vector<NetWhitelistPermissions> vWhitelistedRange;
         std::vector<NetWhitebindPermissions> vWhiteBinds;
@@ -843,7 +842,6 @@ public:
         m_msgproc = connOptions.m_msgproc;
         nSendBufferMaxSize = connOptions.nSendBufferMaxSize;
         nReceiveFloodSize = connOptions.nReceiveFloodSize;
-        m_peer_connect_timeout = connOptions.m_peer_connect_timeout;
         {
             LOCK(cs_totalBytesSent);
             nMaxOutboundLimit = connOptions.nMaxOutboundLimit;
@@ -1098,9 +1096,6 @@ private:
     uint64_t nMaxOutboundTotalBytesSentInCycle GUARDED_BY(cs_totalBytesSent) {0};
     std::chrono::seconds nMaxOutboundCycleStartTime GUARDED_BY(cs_totalBytesSent) {0};
     uint64_t nMaxOutboundLimit GUARDED_BY(cs_totalBytesSent);
-
-    // P2P timeout in seconds
-    int64_t m_peer_connect_timeout;
 
     // Whitelisted ranges. Any node connecting from these is automatically
     // whitelisted (as well as those connecting to whitelisted binds).
