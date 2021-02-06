@@ -12,9 +12,13 @@
 
 #include <util/check.h>
 
+#include <algorithm>
 #include <atomic>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <cstdlib>
 #include <ctime>
+#include <iomanip>
+#include <locale>
+#include <sstream>
 #include <thread>
 
 #include <tinyformat.h>
@@ -155,18 +159,45 @@ std::string FormatISO8601Date(int64_t nTime) {
     return strprintf("%04i-%02i-%02i", ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday);
 }
 
+void SetTimezoneEnv(std::string tz) {
+#if defined(WIN32)
+    _putenv_s("TZ", tz.c_str());
+    _tzset();
+#else
+    setenv("TZ", tz.c_str(), 1);
+    tzset();
+#endif
+}
+
 int64_t ParseISO8601DateTime(const std::string& str)
 {
-    static const boost::posix_time::ptime epoch = boost::posix_time::from_time_t(0);
-    static const std::locale loc(std::locale::classic(),
-        new boost::posix_time::time_input_facet("%Y-%m-%dT%H:%M:%SZ"));
+    std::tm ts {};
+    std::string tz;
+
+    static const std::locale loc(std::locale::classic());
     std::istringstream iss(str);
     iss.imbue(loc);
-    boost::posix_time::ptime ptime(boost::date_time::not_a_date_time);
-    iss >> ptime;
-    if (ptime.is_not_a_date_time() || epoch > ptime)
+
+    if (const char* env_tz = std::getenv("TZ")) {
+        tz = std::string(env_tz);
+    }
+
+    SetTimezoneEnv("UTC");
+
+    iss >> std::get_time(&ts, "%Y-%m-%dT%H:%M:%SZ");
+
+    if (iss.fail()) {
+        SetTimezoneEnv(tz);
         return 0;
-    return (ptime - epoch).total_seconds();
+    }
+
+    const std::time_t since_epoch = std::mktime(&ts);
+
+    SetTimezoneEnv(tz);
+
+    if (since_epoch < 0) return 0;
+
+    return since_epoch;
 }
 
 struct timeval MillisToTimeval(int64_t nTimeout)

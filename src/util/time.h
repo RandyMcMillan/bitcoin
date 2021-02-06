@@ -67,6 +67,11 @@ T GetTime();
  */
 std::string FormatISO8601DateTime(int64_t nTime);
 std::string FormatISO8601Date(int64_t nTime);
+
+/**
+ * Parse an ISO8601 formatted string, and convert the result
+ * into seconds since POSIX epoch time (UTC).
+ */
 int64_t ParseISO8601DateTime(const std::string& str);
 
 /**
