@@ -336,6 +336,7 @@ AC_DEFUN([_BITCOIN_QT_CHECK_STATIC_LIBS], [
   PKG_CHECK_MODULES([QTFB], [Qt5FbSupport${qt_lib_suffix}], [QT_LIBS="-lQt5FbSupport${qt_lib_suffix} $QT_LIBS"])
   if test "x$TARGET_OS" = xlinux; then
     PKG_CHECK_MODULES([QTXCBQPA], [Qt5XcbQpa], [QT_LIBS="$QTXCBQPA_LIBS $QT_LIBS"])
+    QT_LIBS="-lxcb-shm $QT_LIBS"
   elif test "x$TARGET_OS" = xdarwin; then
     PKG_CHECK_MODULES([QTCLIPBOARD], [Qt5ClipboardSupport${qt_lib_suffix}], [QT_LIBS="-lQt5ClipboardSupport${qt_lib_suffix} $QT_LIBS"])
     PKG_CHECK_MODULES([QTGRAPHICS], [Qt5GraphicsSupport${qt_lib_suffix}], [QT_LIBS="-lQt5GraphicsSupport${qt_lib_suffix} $QT_LIBS"])
