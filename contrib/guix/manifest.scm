@@ -3,6 +3,7 @@
              (gnu packages autotools)
              (gnu packages base)
              (gnu packages bash)
+             (gnu packages bison)
              (gnu packages cdrom)
              (gnu packages check)
              (gnu packages cmake)
@@ -214,6 +215,7 @@ chain for " target " development."))
         xz
         zlib
         ;; Build tools
+        bison
         gnu-make
         libtool
         autoconf
