@@ -172,6 +172,8 @@ esac
 # Depends Building #
 ####################
 
+BOOST_CXXFLAGS="-std=c++17 -fvisibility=hidden -fcf-protection=full"
+
 # Build the depends tree, overriding variables that assume multilib gcc
 make -C depends --jobs="$MAX_JOBS" HOST="$HOST" \
                                    ${V:+V=1} \
@@ -191,7 +193,8 @@ make -C depends --jobs="$MAX_JOBS" HOST="$HOST" \
                                    x86_64_linux_NM=x86_64-linux-gnu-nm \
                                    x86_64_linux_STRIP=x86_64-linux-gnu-strip \
                                    qt_config_opts_i686_linux='-platform linux-g++ -xplatform bitcoin-linux-g++' \
-                                   FORCE_USE_SYSTEM_CLANG=1
+                                   FORCE_USE_SYSTEM_CLANG=1 \
+                                   boost_cxxflags="$BOOST_CXXFLAGS"
 
 
 ###########################
