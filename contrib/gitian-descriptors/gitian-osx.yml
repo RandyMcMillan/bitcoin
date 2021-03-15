@@ -41,6 +41,8 @@ script: |
   FAKETIME_HOST_PROGS=""
   FAKETIME_PROGS="ar ranlib date dmg xorrisofs"
 
+  BOOST_CXXFLAGS="-std=c++17 -fvisibility=hidden -fcf-protection=full"
+
   export QT_RCC_TEST=1
   export QT_RCC_SOURCE_DATE_OVERRIDE=1
   export TZ="UTC"
@@ -93,7 +95,7 @@ script: |
 
   # Build dependencies for each host
   for i in $HOSTS; do
-    make ${MAKEOPTS} -C ${BASEPREFIX} HOST="${i}"
+    make ${MAKEOPTS} -C ${BASEPREFIX} HOST="${i}" boost_cxxflags="${BOOST_CXXFLAGS}"
   done
 
   # Faketime for binaries
