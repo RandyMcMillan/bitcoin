@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_WALLET_EXTERNAL_SIGNER_H
-#define BITCOIN_WALLET_EXTERNAL_SIGNER_H
+#ifndef BITCOIN_EXTERNAL_SIGNER_H
+#define BITCOIN_EXTERNAL_SIGNER_H
 
 #include <stdexcept>
 #include <string>
@@ -70,4 +70,4 @@ public:
 #endif
 };
 
-#endif // BITCOIN_WALLET_EXTERNAL_SIGNER_H
+#endif // BITCOIN_EXTERNAL_SIGNER_H
