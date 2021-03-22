@@ -4527,36 +4527,36 @@ static RPCHelpMan upgradewallet()
 #ifdef ENABLE_EXTERNAL_SIGNER
 static RPCHelpMan walletdisplayaddress()
 {
-    return RPCHelpMan{
-        "walletdisplayaddress",
-        "Display address on an external signer for verification.\n",
+    return RPCHelpMan{"walletdisplayaddress",
+        "\nDisplay address on an external signer for verification.\n",
         {
             {"address",     RPCArg::Type::STR, RPCArg::Optional::NO, /* default_val */ "", "bitcoin address to display"},
         },
         RPCResult{RPCResult::Type::NONE,"",""},
         RPCExamples{""},
-        [](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue {
-            std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
-            if (!wallet) return NullUniValue;
-            CWallet* const pwallet = wallet.get();
+    [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    if (!wallet) return NullUniValue;
+    CWallet* const pwallet = wallet.get();
 
-            LOCK(pwallet->cs_wallet);
+    LOCK(pwallet->cs_wallet);
 
-            CTxDestination dest = DecodeDestination(request.params[0].get_str());
+    CTxDestination dest = DecodeDestination(request.params[0].get_str());
 
-            // Make sure the destination is valid
-            if (!IsValidDestination(dest)) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
-            }
+    // Make sure the destination is valid
+    if (!IsValidDestination(dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+    }
 
-            if (!pwallet->DisplayAddress(dest)) {
-                throw JSONRPCError(RPC_MISC_ERROR, "Failed to display address");
-            }
+    if (!pwallet->DisplayAddress(dest)) {
+        throw JSONRPCError(RPC_MISC_ERROR, "Failed to display address");
+    }
 
-            UniValue result(UniValue::VOBJ);
-            result.pushKV("address", request.params[0].get_str());
-            return result;
-        }
+    UniValue result(UniValue::VOBJ);
+    result.pushKV("address", request.params[0].get_str());
+    return result;
+},
     };
 }
 #endif // ENABLE_EXTERNAL_SIGNER
