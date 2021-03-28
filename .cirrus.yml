@@ -57,9 +57,15 @@ task:
     QT_LOCAL_PATH: 'C:\Qt5.9.8_x64_static_vs2019'
     VCPKG_INSTALL_PATH: 'C:\tools\vcpkg\installed'
     VCPKG_COMMIT_ID: 'ed0df8ecc4ed7e755ea03e18aaf285fd9b4b4a74'
+    VCPKG_TAG: '75522bb1f2e7d863078bcd06322348f053a9e33f'
   install_python_script:
     - choco install --yes --no-progress python --version=3.9.2
     - python -VV
   install_msbuild_script:
     - choco install --yes --no-progress visualstudio2019buildtools --version=16.9.2.0
     - msbuild -version
+  install_vcpkg_script:
+    - cd
+    - dir
+    - git clone https://github.com/microsoft/vcpkg.git
+    - cd vcpkg
