@@ -77,5 +77,6 @@ task:
     - cd $env:CIRRUS_WORKING_DIR
     - Write-Host ""
     - vcpkg version
-  prebuild_script:
+  build_script:
     - python build_msvc\msvc-autogen.py
+    - msbuild /p:TrackFileAccess=false build_msvc\bitcoin.sln /m /nologo
