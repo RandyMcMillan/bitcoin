@@ -59,6 +59,7 @@ task:
     QT_LOCAL_PATH: 'C:\Qt5.9.8_x64_static_vs2019'
     VCPKG_TAG: '75522bb1f2e7d863078bcd06322348f053a9e33f'
     VCPKG_FEATURE_FLAGS: 'manifests'
+    IgnoreWarnIntDirInTempDetected: 'true'
   vcpkg_cache:
     folder: 'C:\Users\ContainerAdministrator\AppData\Local\vcpkg\archives'
   install_python_script:
@@ -85,4 +86,4 @@ task:
     - vcpkg version
   build_script:
     - python build_msvc\msvc-autogen.py
-    - msbuild -property:TrackFileAccess=false;IgnoreWarnIntDirInTempDetected=true -maxCpuCount -noLogo build_msvc\bitcoin.sln
+    - msbuild build_msvc\bitcoin.sln -property:TrackFileAccess=false -maxCpuCount -noLogo
