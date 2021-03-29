@@ -83,6 +83,16 @@ task:
     - .\vcpkg integrate install
     - Write-Host ""
     - .\vcpkg version
+  download_qt_binaries_script: |
+      Invoke-WebRequest -Uri $env:QT_DOWNLOAD_URL -Out qtdownload.zip;
+      Write-Host "Qt binaries successfully downloaded, checking hash against $env:QT_DOWNLOAD_HASH...";
+      if((Get-FileHash qtdownload.zip).Hash -eq $env:QT_DOWNLOAD_HASH) {
+        Expand-Archive qtdownload.zip -DestinationPath $env:QT_LOCAL_PATH;
+        Write-Host "Downloaded Qt binaries archive matched the expected hash.";
+      }
+      else {
+        Write-Host "ERROR: Downloaded Qt binaries archive did not match the expected hash.";
+      }
   build_script:
     - cd $env:CIRRUS_WORKING_DIR
     - python build_msvc\msvc-autogen.py
