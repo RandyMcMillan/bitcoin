@@ -64,6 +64,7 @@ task:
     - python -VV
   install_msbuild_script:
     - choco install --yes --no-progress visualstudio2019buildtools --version=16.9.2.0
+    - choco install --yes --no-progress visualstudio2019-workload-vctools --version=1.0.1
     - Write-Host ""
     - msbuild -version
   # We are here: C:\Users\ContainerAdministrator\AppData\Local\Temp\cirrus-ci-build -- This is the repo root.
