@@ -14,7 +14,6 @@
       "name": "libevent",
       "features": ["thread"]
     },
-    "zeromq",
-    "qt5"
+    "zeromq"
   ]
 }
