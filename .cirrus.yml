@@ -86,4 +86,4 @@ task:
     - vcpkg version
   build_script:
     - python build_msvc\msvc-autogen.py
-    - msbuild build_msvc\bitcoin.sln -property:TrackFileAccess=false -maxCpuCount -noLogo
+    - msbuild build_msvc\bitcoin.sln -property:Configuration=Release;TrackFileAccess=false -maxCpuCount -noLogo
