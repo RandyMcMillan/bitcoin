@@ -36,6 +36,7 @@
 #include <validationinterface.h>
 #include <walletinitinterface.h>
 
+#include <chrono>
 #include <functional>
 
 const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
@@ -237,7 +238,7 @@ void TestChain100Setup::mineBlocks(int num_blocks)
         std::vector<CMutableTransaction> noTxns;
         CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
         if (m_deterministic) {
-            SetMockTime(GetTime() + 1);
+            SetMockTime(GetTime<std::chrono::seconds>() + 1s);
         }
         m_coinbase_txns.push_back(b.vtx[0]);
     }
