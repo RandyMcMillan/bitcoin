@@ -1388,7 +1388,7 @@ BOOST_AUTO_TEST_CASE(strprintf_numbers)
  */
 BOOST_AUTO_TEST_CASE(gettime)
 {
-    BOOST_CHECK((GetTime() & ~0xFFFFFFFFLL) == 0);
+    BOOST_CHECK((GetTimeSeconds() & ~0xFFFFFFFFLL) == 0);
 }
 
 BOOST_AUTO_TEST_CASE(util_time_GetTime)
@@ -1397,7 +1397,6 @@ BOOST_AUTO_TEST_CASE(util_time_GetTime)
     // Check that mock time does not change after a sleep
     for (const auto& num_sleep : {0, 1}) {
         UninterruptibleSleep(std::chrono::milliseconds{num_sleep});
-        BOOST_CHECK_EQUAL(111, GetTime()); // Deprecated time getter
         BOOST_CHECK_EQUAL(111, GetTime<std::chrono::seconds>().count());
         BOOST_CHECK_EQUAL(111000, GetTime<std::chrono::milliseconds>().count());
         BOOST_CHECK_EQUAL(111000000, GetTime<std::chrono::microseconds>().count());

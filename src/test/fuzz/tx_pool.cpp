@@ -22,7 +22,7 @@ std::vector<COutPoint> g_outpoints_coinbase_init_immature;
 struct MockedTxPool : public CTxMemPool {
     void RollingFeeUpdate()
     {
-        lastRollingFeeUpdate = GetTime();
+        lastRollingFeeUpdate = GetTimeSeconds();
         blockSinceLastRollingFeeBump = true;
     }
 };

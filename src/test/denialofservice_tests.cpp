@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(outbound_slow_chain_eviction)
         dummyNode1.vSendMsg.clear();
     }
 
-    int64_t nStartTime = GetTime();
+    int64_t nStartTime = GetTimeSeconds();
     // Wait 21 minutes
     SetMockTime(nStartTime+21*60);
     {
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(stale_tip_peer_management)
         BOOST_CHECK(node->fDisconnect == false);
     }
 
-    SetMockTime(GetTime() + 3 * chainparams.GetConsensus().nPowTargetSpacing + 1);
+    SetMockTime(GetTimeSeconds() + 3 * chainparams.GetConsensus().nPowTargetSpacing + 1);
 
     // Now tip should definitely be stale, and we should look for an extra
     // outbound peer
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(stale_tip_peer_management)
 
     // Update the last announced block time for the last
     // peer, and check that the next newest node gets evicted.
-    UpdateLastBlockAnnounceTime(vNodes.back()->GetId(), GetTime());
+    UpdateLastBlockAnnounceTime(vNodes.back()->GetId(), GetTimeSeconds());
 
     peerLogic->CheckForStaleTipAndEvictPeers();
     for (int i = 0; i < max_outbound_full_relay - 1; ++i) {
@@ -309,8 +309,8 @@ BOOST_AUTO_TEST_CASE(DoS_bantime)
                                        *m_node.scheduler, *m_node.chainman, *m_node.mempool, false);
 
     banman->ClearBanned();
-    int64_t nStartTime = GetTime();
-    SetMockTime(nStartTime); // Overrides future calls to GetTime()
+    int64_t nStartTime = GetTimeSeconds();
+    SetMockTime(nStartTime); // Overrides future calls to GetTimeSeconds()
 
     CAddress addr(ip(0xa0b0c001), NODE_NONE);
     CNode dummyNode(id++, NODE_NETWORK, INVALID_SOCKET, addr, /* nKeyedNetGroupIn */ 4, /* nLocalHostNonceIn */ 4, CAddress(), /* pszDest */ "", ConnectionType::INBOUND, /* inbound_onion */ false);
