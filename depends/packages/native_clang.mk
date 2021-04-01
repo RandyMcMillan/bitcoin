@@ -1,9 +1,9 @@
 package=native_clang
-$(package)_version=10.0.1
+$(package)_version=11.0.0
 $(package)_download_path=https://github.com/llvm/llvm-project/releases/download/llvmorg-$($(package)_version)
-$(package)_download_file=clang+llvm-$($(package)_version)-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-$(package)_file_name=clang+llvm-$($(package)_version)-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-$(package)_sha256_hash=48b83ef827ac2c213d5b64f5ad7ed082c8bcb712b46644e0dc5045c6f462c231
+$(package)_download_file=clang+llvm-$($(package)_version)-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+$(package)_file_name=clang-llvm-$($(package)_version)-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+$(package)_sha256_hash=829f5fb0ebda1d8716464394f97d5475d465ddc7bea2879c0601316b611ff6db
 
 define $(package)_preprocess_cmds
   rm -f $($(package)_extract_dir)/lib/libc++abi.so*
