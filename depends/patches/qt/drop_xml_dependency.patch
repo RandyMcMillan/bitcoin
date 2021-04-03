@@ -1,0 +1,8 @@
+--- old/qttools/src/linguist/shared/formats.pri
++++ new/qttools/src/linguist/shared/formats.pri
+@@ -1,6 +1,5 @@
+ 
+ # infrastructure
+-QT *= xml
+
+ INCLUDEPATH *= $$PWD
