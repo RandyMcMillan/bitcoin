@@ -198,7 +198,7 @@ static RPCHelpMan uptime()
                 },
         [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
 {
-    return GetTime() - GetStartupTime();
+    return GetTimeSeconds() - GetStartupTime();
 }
     };
 }

@@ -1299,7 +1299,7 @@ bool AppInitMain(const std::any& context, NodeContext& node, interfaces::BlockAn
     }
 
     if (!LogInstance().m_log_timestamps)
-        LogPrintf("Startup time: %s\n", FormatISO8601DateTime(GetTime()));
+        LogPrintf("Startup time: %s\n", FormatISO8601DateTime(GetTimeSeconds()));
     LogPrintf("Default data directory %s\n", GetDefaultDataDir().string());
     LogPrintf("Using data directory %s\n", GetDataDir().string());
 

@@ -157,7 +157,7 @@ void BaseIndex::ThreadSync()
                 pindex = pindex_next;
             }
 
-            int64_t current_time = GetTime();
+            int64_t current_time = GetTimeSeconds();
             if (last_log_time + SYNC_LOG_INTERVAL < current_time) {
                 LogPrintf("Syncing %s with block chain from height %d\n",
                           GetName(), pindex->nHeight);
