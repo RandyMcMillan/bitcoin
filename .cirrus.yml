@@ -100,5 +100,5 @@ task:
     - src\bench_bitcoin.exe > $null
     - python test\util\bitcoin-util-test.py
     - python test\util\rpcauth-test.py
-#  functional_tests_script:
-#    - python test\functional\test_runner.py --ci --quiet --combinedlogslen=4000
+  functional_tests_script:
+    - python test\functional\test_runner.py --ci --quiet --combinedlogslen=4000
