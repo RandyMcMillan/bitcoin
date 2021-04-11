@@ -53,7 +53,7 @@ task:
   windows_container:
     cpu: 8
     memory: 7424Mi
-    image: cirrusci/windowsservercore:2019
+    image: cirrusci/windowsservercore:visualstudio2019
   timeout_in: 120m
   env:
     CIRRUS_SHELL: powershell
@@ -71,12 +71,6 @@ task:
     - choco install --yes --no-progress python --version=3.9.2
     - Write-Host ""
     - python -VV
-  install_msbuild_script:
-    - choco install --yes --no-progress visualstudio2019buildtools --version=16.9.2.0
-    - Write-Host ""
-    - choco install --yes --no-progress visualstudio2019-workload-vctools --version=1.0.1
-    - Write-Host ""
-    - msbuild -version
   install_vcpkg_script:
     - cd ..
     - git clone --quiet https://github.com/microsoft/vcpkg.git
