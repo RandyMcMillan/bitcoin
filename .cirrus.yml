@@ -52,6 +52,7 @@ task:
 #  << : *INIT_TEMPLATE
   windows_container:
     cpu: 8
+    memory: 7424Mi
     image: cirrusci/windowsservercore:2019
   timeout_in: 120m
   env:
