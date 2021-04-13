@@ -10,8 +10,12 @@ if [[ $QEMU_USER_CMD == qemu-s390* ]]; then
   export LC_ALL=C
 fi
 
-if [ "$CI_OS_NAME" == "macos" ]; then
-  IN_GETOPT_BIN="/usr/local/opt/gnu-getopt/bin/getopt" ${CI_RETRY_EXE} pip3 install --user $PIP_PACKAGES
+if [ -n "$PIP_PACKAGES" ]; then
+  if [ "$CI_OS_NAME" == "macos" ]; then
+    IN_GETOPT_BIN="/usr/local/opt/gnu-getopt/bin/getopt" ${CI_RETRY_EXE} pip3 install --user $PIP_PACKAGES
+  else
+    ${CI_RETRY_EXE} pip3 install --user $PIP_PACKAGES
+  fi
 fi
 
 # Create folders that are mounted into the docker
