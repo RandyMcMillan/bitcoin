@@ -6,7 +6,7 @@ $(package)_file_name=$($(package)_version).tar.gz
 $(package)_sha256_hash=380c1ca37cfa04a8699d0887a8d3ee1ad27f3d08baba78887c73b09485c0fbd3
 
 ifeq ($(strip $(FORCE_USE_SYSTEM_CLANG)),)
-$(package)_dependencies=native_clang
+$(package)_dependencies=native_llvm
 endif
 
 define $(package)_build_cmds
