@@ -11,5 +11,5 @@ pub static RUST_CONSTANT: i32 = 43;
 
 #[no_mangle]
 pub extern "C" fn hello_world() {
-    println!("Hello World!");
+    println!("Hello World from Rust!");
 }

@@ -87,6 +87,10 @@
 #include <zmq/zmqrpc.h>
 #endif
 
+#if ENABLE_RUSTY
+#include <rusty/out/rusty.hpp>
+#endif
+
 static const bool DEFAULT_PROXYRANDOMIZE = true;
 static const bool DEFAULT_REST_ENABLE = false;
 
@@ -1810,6 +1814,11 @@ bool AppInitMain(NodeContext& node, interfaces::BlockAndHeaderTipInfo* tip_info)
 
 #if HAVE_SYSTEM
     StartupNotify(args);
+#endif
+
+#if ENABLE_RUSTY
+    assert(rust_hello_world_example::RUST_CONSTANT == 43);
+    rust_hello_world_example::hello_world();
 #endif
 
     return true;
