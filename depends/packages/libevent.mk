@@ -7,7 +7,8 @@ $(package)_patches=0001-fix-windows-getaddrinfo.patch
 
 define $(package)_preprocess_cmds
    patch -p1 < $($(package)_patch_dir)/0001-fix-windows-getaddrinfo.patch && \
-  ./autogen.sh
+  ./autogen.sh && \
+  cp -f $(BASEDIR)/config.guess $(BASEDIR)/config.sub .
 endef
 
 # When building for Windows, we set _WIN32_WINNT to target the same Windows
