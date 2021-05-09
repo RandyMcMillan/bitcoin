@@ -10,6 +10,7 @@ Example usage:
 
     find ../gitian-builder/build -type f -executable | xargs python3 contrib/devtools/symbol-check.py
 '''
+import re
 import subprocess
 import sys
 import os
@@ -218,6 +219,23 @@ def check_MACHO_min_os(filename) -> bool:
         return True
     return False
 
+def check_MACHO_sdk(filename) -> bool:
+    '''
+    When we're using LIEF 0.12+, we can check build_vesion.sdk
+    https://github.com/lief-project/LIEF/issues/577
+    '''
+    binary = lief.parse(filename)
+
+    rx = re.compile(r'SDK: (\d+)\.(\d+)\.(\d+)')
+    m = rx.search(str(binary.build_version))
+
+    if m:
+        sdk_ver = [i for i in map(int, m.groups())]
+
+        if sdk_ver == [10, 15, 6]:
+            return True
+    return False
+
 def check_PE_libraries(filename) -> bool:
     ok: bool = True
     binary = lief.parse(filename)
@@ -244,6 +262,7 @@ CHECKS = {
 'MACHO': [
     ('DYNAMIC_LIBRARIES', check_MACHO_libraries),
     ('MIN_OS', check_MACHO_min_os),
+    ('SDK', check_MACHO_sdk),
 ],
 'PE' : [
     ('DYNAMIC_LIBRARIES', check_PE_libraries),
