@@ -191,7 +191,13 @@ def check_NX(executable) -> bool:
 def check_control_flow(executable) -> bool:
     '''
     Check for control flow instrumentation
+    test_bitcoin.exe is skipped because Boost in depends isn't built with
+    -fcf-protection=full when targeting Windows. See #21888.
     '''
+
+    if executable.endswith('test_bitcoin.exe'):
+        return True
+
     binary = lief.parse(executable)
 
     content = binary.get_content_from_virtual_address(binary.entrypoint, 4, lief.Binary.VA_TYPES.AUTO)
@@ -214,7 +220,8 @@ CHECKS = {
     ('DYNAMIC_BASE', check_PE_DYNAMIC_BASE),
     ('HIGH_ENTROPY_VA', check_PE_HIGH_ENTROPY_VA),
     ('NX', check_NX),
-    ('RELOC_SECTION', check_PE_RELOC_SECTION)
+    ('RELOC_SECTION', check_PE_RELOC_SECTION),
+    ('CONTROL_FLOW', check_control_flow),
 ],
 'MACHO': [
     ('PIE', check_PIE),
