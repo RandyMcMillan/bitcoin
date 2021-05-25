@@ -30,4 +30,8 @@ ifeq ($(strip $(FORCE_USE_SYSTEM_CLANG)),)
 darwin_native_packages+= native_clang
 endif
 
+ifneq ($(strip $(USE_MUSL_LIB)),)
+linux_native_packages = musl_cross_make
+endif
+
 endif
