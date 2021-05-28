@@ -532,7 +532,7 @@ void CAddrMan::Connected_(const CService& addr, int64_t nTime)
     // update info
     int64_t nUpdateInterval = 20 * 60;
     if (nTime - info.nTime > nUpdateInterval)
-        info.nTime = nTime;
+        info.nTime = static_cast<uint32_t>(nTime);
 }
 
 void CAddrMan::SetServices_(const CService& addr, ServiceFlags nServices)
