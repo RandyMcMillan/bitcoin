@@ -8,9 +8,11 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
 AM_INIT_AUTOMAKE([subdir-objects foreign])
 
-LT_INIT
-LT_LANG([C++])
-AC_LANG([C++])
+AC_PROG_CXX
+
+AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
+
+LT_INIT([pic-only])
 
 AC_PATH_PROG(CCACHE,ccache)
 
@@ -64,7 +66,6 @@ fi
 
 AX_CHECK_COMPILE_FLAG([-Werror],[CXXFLAG_WERROR="-Werror"],[CXXFLAG_WERROR=""])
 
-AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
 enable_clmul=
 AX_CHECK_COMPILE_FLAG([-mpclmul],[[enable_clmul=yes]],,[[$CXXFLAG_WERROR]],[AC_LANG_PROGRAM([
   #include <stdint.h>
