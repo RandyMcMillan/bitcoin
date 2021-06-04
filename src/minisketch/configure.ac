@@ -66,6 +66,8 @@ fi
 
 AX_CHECK_COMPILE_FLAG([-Werror],[CXXFLAG_WERROR="-Werror"],[CXXFLAG_WERROR=""])
 
+AX_CHECK_COMPILE_FLAG([-Wabi-tag],[CXXFLAG_WERROR="-Wabi-tag"],[CXXFLAG_WERROR=""])
+
 enable_clmul=
 AX_CHECK_COMPILE_FLAG([-mpclmul],[[enable_clmul=yes]],,[[$CXXFLAG_WERROR]],[AC_LANG_PROGRAM([
   #include <stdint.h>
