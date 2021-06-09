@@ -1182,7 +1182,7 @@ bool CConnman::AddConnection(const std::string& address, ConnectionType conn_typ
     CSemaphoreGrant grant(*semOutbound, true);
     if (!grant) return false;
 
-    OpenNetworkConnection(CAddress(), false, &grant, address.c_str(), conn_type);
+    OpenNetworkConnection(CAddress(), false, &grant, address, conn_type);
     return true;
 }
 
@@ -1711,18 +1711,18 @@ void CConnman::DumpAddresses()
 
 void CConnman::ProcessAddrFetch()
 {
-    std::string strDest;
+    std::string dest;
     {
         LOCK(m_addr_fetches_mutex);
         if (m_addr_fetches.empty())
             return;
-        strDest = m_addr_fetches.front();
+        dest = m_addr_fetches.front();
         m_addr_fetches.pop_front();
     }
     CAddress addr;
     CSemaphoreGrant grant(*semOutbound, true);
     if (grant) {
-        OpenNetworkConnection(addr, false, &grant, strDest.c_str(), ConnectionType::ADDR_FETCH);
+        OpenNetworkConnection(addr, false, &grant, dest, ConnectionType::ADDR_FETCH);
     }
 }
 
@@ -1782,7 +1782,7 @@ void CConnman::ThreadOpenConnections(const std::vector<std::string> connect)
             for (const std::string& strAddr : connect)
             {
                 CAddress addr(CService(), NODE_NONE);
-                OpenNetworkConnection(addr, false, nullptr, strAddr.c_str(), ConnectionType::MANUAL);
+                OpenNetworkConnection(addr, false, nullptr, strAddr, ConnectionType::MANUAL);
                 for (int i = 0; i < 10 && i < nLoop; i++)
                 {
                     if (!interruptNet.sleep_for(std::chrono::milliseconds(500)))
@@ -2037,7 +2037,7 @@ void CConnman::ThreadOpenConnections(const std::vector<std::string> connect)
                 LogPrint(BCLog::NET, "Making feeler connection to %s\n", addrConnect.ToString());
             }
 
-            OpenNetworkConnection(addrConnect, (int)setConnected.size() >= std::min(nMaxConnections - 1, 2), &grant, nullptr, conn_type);
+            OpenNetworkConnection(addrConnect, (int)setConnected.size() >= std::min(nMaxConnections - 1, 2), &grant, std::nullopt, conn_type);
         }
     }
 }
@@ -2125,7 +2125,7 @@ void CConnman::ThreadOpenAddedConnections()
                 }
                 tried = true;
                 CAddress addr(CService(), NODE_NONE);
-                OpenNetworkConnection(addr, false, &grant, info.strAddedNode.c_str(), ConnectionType::MANUAL);
+                OpenNetworkConnection(addr, false, &grant, info.strAddedNode, ConnectionType::MANUAL);
                 if (!interruptNet.sleep_for(std::chrono::milliseconds(500)))
                     return;
             }
@@ -2137,7 +2137,7 @@ void CConnman::ThreadOpenAddedConnections()
 }
 
 // if successful, this moves the passed grant to the constructed node
-void CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool count_failure, CSemaphoreGrant *grantOutbound, const char *pszDest, ConnectionType conn_type)
+void CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool count_failure, CSemaphoreGrant *grantOutbound, std::optional<std::string> dest, ConnectionType conn_type)
 {
     assert(conn_type != ConnectionType::INBOUND);
 
@@ -2150,15 +2150,15 @@ void CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool count_fai
     if (!fNetworkActive) {
         return;
     }
-    if (!pszDest) {
+    if (!dest) {
         bool banned_or_discouraged = m_banman && (m_banman->IsDiscouraged(addrConnect) || m_banman->IsBanned(addrConnect));
         if (IsLocal(addrConnect) || banned_or_discouraged || AlreadyConnectedToAddress(addrConnect)) {
             return;
         }
-    } else if (FindNode(std::string(pszDest)))
+    } else if (FindNode(dest.value()))
         return;
 
-    CNode* pnode = ConnectNode(addrConnect, pszDest, count_failure, conn_type);
+    CNode* pnode = ConnectNode(addrConnect, dest, count_failure, conn_type);
 
     if (!pnode)
         return;
