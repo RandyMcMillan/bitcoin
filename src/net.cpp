@@ -45,6 +45,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <string>
 #include <unordered_map>
 
 #include <math.h>
@@ -378,11 +379,11 @@ static CAddress GetBindAddress(SOCKET sock)
     return addr_bind;
 }
 
-CNode* CConnman::ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure, ConnectionType conn_type)
+CNode* CConnman::ConnectNode(CAddress addrConnect, std::optional<std::string> dest, bool fCountFailure, ConnectionType conn_type)
 {
     assert(conn_type != ConnectionType::INBOUND);
 
-    if (pszDest == nullptr) {
+    if (!dest) {
         if (IsLocal(addrConnect))
             return nullptr;
 
@@ -397,20 +398,20 @@ CNode* CConnman::ConnectNode(CAddress addrConnect, const char *pszDest, bool fCo
 
     /// debug print
     LogPrint(BCLog::NET, "trying connection %s lastseen=%.1fhrs\n",
-        pszDest ? pszDest : addrConnect.ToString(),
-        pszDest ? 0.0 : (double)(GetAdjustedTime() - addrConnect.nTime)/3600.0);
+        dest.value_or(addrConnect.ToString()),
+        dest ? 0.0 : (double)(GetAdjustedTime() - addrConnect.nTime)/3600.0);
 
     // Resolve
     const uint16_t default_port{Params().GetDefaultPort()};
-    if (pszDest) {
+    if (dest) {
         std::vector<CService> resolved;
-        if (Lookup(pszDest, resolved,  default_port, fNameLookup && !HaveNameProxy(), 256) && !resolved.empty()) {
+        if (Lookup(dest.value(), resolved,  default_port, fNameLookup && !HaveNameProxy(), 256) && !resolved.empty()) {
             addrConnect = CAddress(resolved[GetRand(resolved.size())], NODE_NONE);
             if (!addrConnect.IsValid()) {
-                LogPrint(BCLog::NET, "Resolver returned invalid address %s for %s\n", addrConnect.ToString(), pszDest);
+                LogPrint(BCLog::NET, "Resolver returned invalid address %s for %s\n", addrConnect.ToString(), dest.value());
                 return nullptr;
             }
-            // It is possible that we already have a connection to the IP/port pszDest resolved to.
+            // It is possible that we already have a connection to the IP/port dest resolved to.
             // In that case, drop the connection that was just created, and return the existing CNode instead.
             // Also store the name we used to connect in that CNode, so that future FindNode() calls to that
             // name catch this early.
@@ -418,7 +419,7 @@ CNode* CConnman::ConnectNode(CAddress addrConnect, const char *pszDest, bool fCo
             CNode* pnode = FindNode(static_cast<CService>(addrConnect));
             if (pnode)
             {
-                pnode->MaybeSetAddrName(std::string(pszDest));
+                pnode->MaybeSetAddrName(dest.value());
                 LogPrintf("Failed to open new connection, already connected\n");
                 return nullptr;
             }
@@ -463,14 +464,14 @@ CNode* CConnman::ConnectNode(CAddress addrConnect, const char *pszDest, bool fCo
             // the proxy, mark this as an attempt.
             addrman.Attempt(addrConnect, fCountFailure);
         }
-    } else if (pszDest && GetNameProxy(proxy)) {
+    } else if (dest && GetNameProxy(proxy)) {
         sock = CreateSock(proxy.proxy);
         if (!sock) {
             return nullptr;
         }
         std::string host;
         uint16_t port{default_port};
-        SplitHostPort(std::string(pszDest), port, host);
+        SplitHostPort(dest.value(), port, host);
         bool proxyConnectionFailed;
         connected = ConnectThroughProxy(proxy, host, port, *sock, nConnectTimeout,
                                         proxyConnectionFailed);
@@ -485,7 +486,7 @@ CNode* CConnman::ConnectNode(CAddress addrConnect, const char *pszDest, bool fCo
     if (!addr_bind.IsValid()) {
         addr_bind = GetBindAddress(sock->Get());
     }
-    CNode* pnode = new CNode(id, nLocalServices, sock->Release(), addrConnect, CalculateKeyedNetGroup(addrConnect), nonce, addr_bind, pszDest ? pszDest : "", conn_type, /* inbound_onion */ false);
+    CNode* pnode = new CNode(id, nLocalServices, sock->Release(), addrConnect, CalculateKeyedNetGroup(addrConnect), nonce, addr_bind, dest.value_or(""), conn_type, /* inbound_onion */ false);
     pnode->AddRef();
 
     // We're making a new connection, harvest entropy from the time (and our peer count)
