@@ -4,8 +4,9 @@ cache(, super)
 !QTDIR_build: cache(CONFIG, add, $$list(QTDIR_build))
 
 TEMPLATE = subdirs
-SUBDIRS = qtbase qttools qttranslations
+SUBDIRS = qtbase qtdeclarative qttools qttranslations
 
+qtdeclarative.depends = qtbase
 qttools.depends = qtbase
 qttranslations.depends = qttools
 
