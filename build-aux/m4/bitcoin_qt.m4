@@ -389,8 +389,16 @@ AC_DEFUN([_BITCOIN_QT_FIND_LIBS],[
                       [BITCOIN_QT_FAIL([${qt_lib_prefix}Network${qt_lib_suffix} $qt_version not found])])
   ])
   BITCOIN_QT_CHECK([
-    PKG_CHECK_MODULES([QT_QML], [${qt_lib_prefix}Qml${qt_lib_suffix} $qt_version], [QT_INCLUDES="$QT_QML_CFLAGS $QT_INCLUDES" QT_LIBS="$QT_QML_LIBS $QT_LIBS"],
-                      [BITCOIN_QT_FAIL([${qt_lib_prefix}Qml${qt_lib_suffix} $qt_version not found])])
+    if test "x$TARGET_OS" = xlinux; then
+      FIND_LIBS_TEMP_LIBS="$LIBS"
+      LIBS="$LIBS -lxcb-shm"
+      PKG_CHECK_MODULES([QT_QML], [${qt_lib_prefix}Qml${qt_lib_suffix} $qt_version], [QT_INCLUDES="$QT_QML_CFLAGS $QT_INCLUDES" QT_LIBS="$QT_QML_LIBS -lxcb-shm $QT_LIBS"],
+                        [BITCOIN_QT_FAIL([${qt_lib_prefix}Qml${qt_lib_suffix} $qt_version not found])])
+      LIBS="$FIND_LIBS_TEMP_LIBS"
+    else
+      PKG_CHECK_MODULES([QT_QML], [${qt_lib_prefix}Qml${qt_lib_suffix} $qt_version], [QT_INCLUDES="$QT_QML_CFLAGS $QT_INCLUDES" QT_LIBS="$QT_QML_LIBS $QT_LIBS"],
+                        [BITCOIN_QT_FAIL([${qt_lib_prefix}Qml${qt_lib_suffix} $qt_version not found])])
+    fi
   ])
   BITCOIN_QT_CHECK([
     PKG_CHECK_MODULES([QT_QUICK], [${qt_lib_prefix}Quick${qt_lib_suffix} $qt_version], [QT_INCLUDES="$QT_QUICK_CFLAGS $QT_INCLUDES" QT_LIBS="$QT_QUICK_LIBS $QT_LIBS"],
