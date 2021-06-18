@@ -176,9 +176,6 @@ def check_ELF_separate_code(executable):
         '.data': 'RW',
         '.bss': 'RW',
     }
-    if elf.hdr.e_machine == pixie.EM_PPC64:
-        # .plt is RW on ppc64 even with separate-code
-        EXPECTED_FLAGS[b'.plt'] = R | W
     # For all LOAD program headers get mapping to the list of sections,
     # and for each section, remember the flags of the associated program header.
     flags_per_section = {}
@@ -283,7 +280,6 @@ CHECKS = {
     ('PIE', check_PIE),
     ('NOUNDEFS', check_MACHO_NOUNDEFS),
     ('NX', check_NX),
-    ('LAZY_BINDINGS', check_MACHO_LAZY_BINDINGS),
     ('Canary', check_MACHO_Canary),
     ('CONTROL_FLOW', check_control_flow),
 ]
