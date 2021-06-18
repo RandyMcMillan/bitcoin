@@ -57,8 +57,7 @@ DIST_SHARE = \
   $(top_srcdir)/share/rpcauth
 
 BIN_CHECKS=$(top_srcdir)/contrib/devtools/symbol-check.py \
-           $(top_srcdir)/contrib/devtools/security-check.py \
-           $(top_srcdir)/contrib/devtools/pixie.py
+           $(top_srcdir)/contrib/devtools/security-check.py
 
 WINDOWS_PACKAGING = $(top_srcdir)/share/pixmaps/bitcoin.ico \
   $(top_srcdir)/share/pixmaps/nsis-header.bmp \
