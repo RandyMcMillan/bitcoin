@@ -98,7 +98,8 @@ extern "C" int __wrap_fcntl64(int fd, int cmd, ...)
     case F_SET_FILE_RW_HINT: goto takes_uint64_t_ptr;
 
     default:
-        fprintf(stderr, "fcntl64 workaround got unknown F_XXX constant");
+        fprintf(stderr, "fcntl64 workaround got unknown F_XXX constant: %d", cmd);
+        exit(1);
     }
 
 takes_void:
