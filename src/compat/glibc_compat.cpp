@@ -57,9 +57,9 @@ extern "C" int __wrap_fcntl64(int fd, int cmd, ...)
 
     // File byte range locking, held across fork()/clone() -- Not POSIX
     //
-    case F_OFD_SETLK: goto takes_flock_ptr_INCOMPATIBLE;
-    case F_OFD_SETLKW: goto takes_flock_ptr_INCOMPATIBLE;
-    case F_OFD_GETLK: goto takes_flock_ptr_INCOMPATIBLE;
+    case F_OFD_SETLK: goto takes_flock_ptr;
+    case F_OFD_SETLKW: goto takes_flock_ptr;
+    case F_OFD_GETLK: goto takes_flock_ptr;
 
     // Managing I/O availability signals
     //
@@ -114,18 +114,6 @@ takes_flock_ptr:
     result = fcntl64(fd, cmd, va_arg(va, struct flock*));
     va_end(va);
     return result;
-
-takes_flock_ptr_INCOMPATIBLE:
-    //
-    // !!! This is the breaking case: the size of the flock
-    // structure changed to accommodate larger files.  If you
-    // need this, you'll have to define a compatibility struct
-    // with the older glibc and make your own entry point using it,
-    // then call fcntl64() with it directly (bear in mind that has
-    // been remapped to the old fcntl())
-    //
-    fprintf(stderr, "fcntl64 hack can't use glibc flock directly: %d\n", cmd);
-    exit(1);
 
 takes_f_owner_ex_ptr:
     result = fcntl64(fd, cmd, va_arg(va, struct f_owner_ex*));
