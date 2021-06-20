@@ -15,6 +15,7 @@
              (gnu packages file)
              (gnu packages gawk)
              (gnu packages gcc)
+             (gnu packages glibc)
              (gnu packages gnome)
              (gnu packages image)
              (gnu packages imagemagick)
