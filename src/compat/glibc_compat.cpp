@@ -51,9 +51,9 @@ extern "C" int __wrap_fcntl64(int fd, int cmd, ...)
 
     // File byte range locking, not held across fork() or clone()
     //
-    case F_SETLK: goto takes_flock_ptr_INCOMPATIBLE;
-    case F_SETLKW: goto takes_flock_ptr_INCOMPATIBLE;
-    case F_GETLK: goto takes_flock_ptr_INCOMPATIBLE;
+    case F_SETLK: goto takes_flock_ptr;
+    case F_SETLKW: goto takes_flock_ptr;
+    case F_GETLK: goto takes_flock_ptr;
 
     // File byte range locking, held across fork()/clone() -- Not POSIX
     //
@@ -107,6 +107,11 @@ takes_void:
 
 takes_int:
     result = fcntl64(fd, cmd, va_arg(va, int));
+    va_end(va);
+    return result;
+
+takes_flock_ptr:
+    result = fcntl64(fd, cmd, va_arg(va, struct flock*));
     va_end(va);
     return result;
 
