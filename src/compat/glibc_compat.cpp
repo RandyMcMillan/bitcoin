@@ -97,7 +97,7 @@ extern "C" int __wrap_fcntl64(int fd, int cmd, ...)
     case F_SET_FILE_RW_HINT: goto takes_uint64_t_ptr;
 
     default:
-        fprintf(stderr, "fcntl64 workaround got unknown F_XXX constant: %d", cmd);
+        fprintf(stderr, "fcntl64 workaround got unknown F_XXX constant: %d\n", cmd);
         exit(1);
     }
 
@@ -119,7 +119,7 @@ takes_flock_ptr_INCOMPATIBLE:
     // then call fcntl64() with it directly (bear in mind that has
     // been remapped to the old fcntl())
     //
-    fprintf(stderr, "fcntl64 hack can't use glibc flock directly");
+    fprintf(stderr, "fcntl64 hack can't use glibc flock directly: %d\n", cmd);
     exit(1);
 
 takes_f_owner_ex_ptr:
