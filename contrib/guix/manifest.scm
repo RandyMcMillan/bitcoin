@@ -138,7 +138,7 @@ chain for " target " development."))
                                        #:key
                                        (base-gcc-for-libc gcc-7)
                                        (base-kernel-headers linux-libre-headers-5.4)
-                                       (base-libc glibc)  ; glibc 2.31
+                                       (base-libc glibc-2.24)  ; Keep compatibility with old distros.
                                        (base-gcc (make-gcc-rpath-link base-gcc)))
   "Convenience wrapper around MAKE-CROSS-TOOLCHAIN with default values
 desirable for building Bitcoin Core release binaries."
