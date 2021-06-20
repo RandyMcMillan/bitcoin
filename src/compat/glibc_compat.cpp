@@ -6,21 +6,20 @@
 #include <config/bitcoin-config.h>
 #endif
 
-#include <cstdarg>
 #include <cstddef>
 #include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-
-#include <fcntl.h>
 
 // See https://stackoverflow.com/a/58472959
+#if !defined(__arm__) && defined(__GLIBC__) && (__GLIBC__ == 2) && (__GLIBC_MINOR__ >= 28)
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <fcntl.h>
+
 #ifdef __i386__
 __asm(".symver fcntl64,fcntl@GLIBC_2.1");
 #elif defined(__amd64__)
 __asm(".symver fcntl64,fcntl@GLIBC_2.2.5");
-#elif defined(__arm__)
-__asm(".symver fcntl64,fcntl@GLIBC_2.4");
 #elif defined(__aarch64__)
 __asm(".symver fcntl64,fcntl@GLIBC_2.17");
 #elif defined(__powerpc64__)
@@ -133,6 +132,7 @@ takes_uint64_t_ptr:
     va_end(va);
     return result;
 }
+#endif
 
 #if defined(__i386__) || defined(__arm__)
 
