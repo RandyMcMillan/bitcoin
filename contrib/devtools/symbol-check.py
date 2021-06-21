@@ -44,7 +44,7 @@ MAX_VERSIONS = {
 'GLIBC': {
     pixie.EM_386:    (2,17),
     pixie.EM_X86_64: (2,17),
-    pixie.EM_ARM:    (2,17),
+    pixie.EM_ARM:    (2,28), # To embrace fcntl64 symbol.
     pixie.EM_AARCH64:(2,17),
     pixie.EM_PPC64:  (2,17),
     pixie.EM_RISCV:  (2,27),
