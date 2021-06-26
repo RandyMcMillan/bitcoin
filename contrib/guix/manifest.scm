@@ -630,14 +630,7 @@ inspecting signatures in Mach-O binaries.")
                  (make-nsis-with-sde-support nsis-x86_64)
                  osslsigncode))
           ((string-contains target "-linux-")
-           (list (cond ((string-contains target "riscv64-")
-                        (make-bitcoin-cross-toolchain target
-                                                      #:base-libc (package-with-extra-patches glibc-2.27
-                                                                    (search-our-patches "glibc-2.27-riscv64-Use-__has_include__-to-include-asm-syscalls.h.patch"))))
-                       ((or (string-contains target "powerpc64le-") (string-contains target "aarch64-"))
-                        (make-bitcoin-cross-toolchain target #:base-libc (make-glibc-without-ssp glibc-2.24)))
-                       (else
-                        (make-bitcoin-cross-toolchain target)))))
+           (list (make-bitcoin-cross-toolchain target)))
           ((string-contains target "darwin")
            (list clang-toolchain-10 binutils imagemagick libtiff librsvg font-tuffy cmake xorriso python-signapple))
           (else '())))))
