@@ -135,11 +135,17 @@ chain for " target " development."))
   (package-with-extra-patches gcc-8
     (search-our-patches "gcc-8-sort-libtool-find-output.patch")))
 
+(define (make-glibc-without-ssp xglibc)
+  (package-with-extra-configure-variable
+   (package-with-extra-configure-variable
+    xglibc "libc_cv_ssp" "no")
+   "libc_cv_ssp_strong" "no"))
+
 (define* (make-bitcoin-cross-toolchain target
                                        #:key
                                        (base-gcc-for-libc gcc-7)
                                        (base-kernel-headers linux-libre-headers-5.4)
-                                       (base-libc glibc)  ; glibc 2.31
+                                       (base-libc (make-glibc-without-ssp glibc-2.17))
                                        (base-gcc (make-gcc-rpath-link base-gcc)))
   "Convenience wrapper around MAKE-CROSS-TOOLCHAIN with default values
 desirable for building Bitcoin Core release binaries."
@@ -557,6 +563,52 @@ and endian independent.")
 inspecting signatures in Mach-O binaries.")
       (license license:expat))))
 
+(define-public glibc-2.17
+  (package
+    (inherit glibc)
+    (version "2.17")
+    (source (origin
+              (inherit (package-source glibc))
+              (uri (string-append "mirror://gnu/glibc/glibc-" version ".tar.xz"))
+              (sha256
+               (base32
+                "0gmjnn4kma9vgizccw1jv979xw55a8n1nkk94gg0l3hy80vy6539"))
+              (patches (search-our-patches "glibc-ldd-x86_64.patch"
+                                           "glibc-versioned-locpath.patch"
+                                           "glibc-2.17-supported-locales.patch"
+                                           "glibc-2.17-accept-make4.patch"
+                                           "glibc-2.17-_obstack_compat-initialize.patch"
+                                           "glibc-2.17-fix-libgcc_s_resume-issue.patch"))))
+    (arguments
+     (substitute-keyword-arguments
+         (package-arguments glibc)
+       ((#:phases phases)
+        `(modify-phases ,phases
+           (add-before 'configure 'fix-pwd
+             (lambda _
+               (setenv "libc_cv_ssp" "false")
+               (substitute* "configure"
+                 (("/bin/pwd") "pwd"))
+               #t))))))))
+
+(define-public glibc-2.24
+  (package
+    (inherit glibc)
+    (version "2.24")
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "https://sourceware.org/git/glibc.git")
+                    (commit "0d7f1ed30969886c8dde62fbf7d2c79967d4bace")))
+              (file-name (git-file-name "glibc" "0d7f1ed30969886c8dde62fbf7d2c79967d4bace"))
+              (sha256
+               (base32
+                "0g5hryia5v1k0qx97qffgwzrz4lr4jw3s5kj04yllhswsxyjbic3"))
+              (patches (search-our-patches "glibc-ldd-x86_64.patch"
+                                           "glibc-versioned-locpath.patch"
+                                           "glibc-2.24-elfm-loadaddr-dynamic-rewrite.patch"
+                                           "glibc-2.24-no-build-time-cxx-header-run.patch"))))))
+
 (packages->manifest
  (append
   (list ;; The Basics
@@ -606,7 +658,14 @@ inspecting signatures in Mach-O binaries.")
                  (make-nsis-with-sde-support nsis-x86_64)
                  osslsigncode))
           ((string-contains target "-linux-")
-           (list (make-bitcoin-cross-toolchain target)))
+           (list (cond ((string-contains target "riscv64-")
+                        (make-bitcoin-cross-toolchain target
+                                                      #:base-libc (package-with-extra-patches glibc-2.27
+                                                                    (search-our-patches "glibc-2.27-riscv64-Use-__has_include__-to-include-asm-syscalls.h.patch"))))
+                       ((or (string-contains target "powerpc64le-") (string-contains target "aarch64-"))
+                        (make-bitcoin-cross-toolchain target #:base-libc (make-glibc-without-ssp glibc-2.24)))
+                       (else
+                        (make-bitcoin-cross-toolchain target)))))
           ((string-contains target "darwin")
            (list clang-toolchain-10 binutils imagemagick libtiff librsvg font-tuffy cmake xorriso python-signapple))
           (else '())))))
