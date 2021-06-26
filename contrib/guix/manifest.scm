@@ -145,7 +145,7 @@ chain for " target " development."))
                                        #:key
                                        (base-gcc-for-libc gcc-7)
                                        (base-kernel-headers linux-libre-headers-5.4)
-                                       (base-libc (make-glibc-without-ssp glibc-2.17))
+                                       (base-libc (make-glibc-without-ssp glibc-2.24))
                                        (base-gcc (make-gcc-rpath-link base-gcc)))
   "Convenience wrapper around MAKE-CROSS-TOOLCHAIN with default values
 desirable for building Bitcoin Core release binaries."
@@ -562,34 +562,6 @@ and endian independent.")
       (description "signapple is a Python tool for creating, verifying, and
 inspecting signatures in Mach-O binaries.")
       (license license:expat))))
-
-(define-public glibc-2.17
-  (package
-    (inherit glibc)
-    (version "2.17")
-    (source (origin
-              (inherit (package-source glibc))
-              (uri (string-append "mirror://gnu/glibc/glibc-" version ".tar.xz"))
-              (sha256
-               (base32
-                "0gmjnn4kma9vgizccw1jv979xw55a8n1nkk94gg0l3hy80vy6539"))
-              (patches (search-our-patches "glibc-ldd-x86_64.patch"
-                                           "glibc-versioned-locpath.patch"
-                                           "glibc-2.17-supported-locales.patch"
-                                           "glibc-2.17-accept-make4.patch"
-                                           "glibc-2.17-_obstack_compat-initialize.patch"
-                                           "glibc-2.17-fix-libgcc_s_resume-issue.patch"))))
-    (arguments
-     (substitute-keyword-arguments
-         (package-arguments glibc)
-       ((#:phases phases)
-        `(modify-phases ,phases
-           (add-before 'configure 'fix-pwd
-             (lambda _
-               (setenv "libc_cv_ssp" "false")
-               (substitute* "configure"
-                 (("/bin/pwd") "pwd"))
-               #t))))))))
 
 (define-public glibc-2.24
   (package
