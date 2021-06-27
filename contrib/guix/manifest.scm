@@ -580,6 +580,11 @@ inspecting signatures in Mach-O binaries.")
                                            "glibc-versioned-locpath.patch"
                                            "glibc-2.24-elfm-loadaddr-dynamic-rewrite.patch"
                                            "glibc-2.24-no-build-time-cxx-header-run.patch"))))))
+(define-public xgcc-x86_64
+  (let ((triplet "x86_64-linux-gnu"))
+    (cross-gcc triplet
+               #:xbinutils (cross-binutils triplet)
+               #:libc (cross-libc triplet glibc-2.24))))
 
 (packages->manifest
  (append
@@ -621,16 +626,6 @@ inspecting signatures in Mach-O binaries.")
         lief
         ;; Native gcc 7 toolchain
         gcc-toolchain-7
-        (list gcc-toolchain-7 "static"))
-  (let ((target (getenv "HOST")))
-    (cond ((string-suffix? "-mingw32" target)
-           ;; Windows
-           (list zip
-                 (make-mingw-pthreads-cross-toolchain "x86_64-w64-mingw32")
-                 (make-nsis-with-sde-support nsis-x86_64)
-                 osslsigncode))
-          ((string-contains target "-linux-")
-           (list (make-bitcoin-cross-toolchain target)))
-          ((string-contains target "darwin")
-           (list clang-toolchain-10 binutils imagemagick libtiff librsvg font-tuffy cmake xorriso python-signapple))
-          (else '())))))
+        (list gcc-toolchain-7 "static")
+        ;; HEBASTO
+        xgcc-x86_64)))
