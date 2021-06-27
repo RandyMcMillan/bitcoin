@@ -555,6 +555,12 @@ and endian independent.")
 inspecting signatures in Mach-O binaries.")
       (license license:expat))))
 
+(define-public xgcc-x86_64
+  (let ((triplet "x86_64-linux-gnu"))
+    (cross-gcc triplet
+               #:xbinutils (cross-binutils triplet)
+               #:libc (cross-libc triplet glibc-2.24))))
+
 (packages->manifest
  (append
   (list ;; The Basics
@@ -593,18 +599,5 @@ inspecting signatures in Mach-O binaries.")
         git
         ;; Tests
         lief
-        ;; Native gcc 7 toolchain
-        gcc-toolchain-7
-        (list gcc-toolchain-7 "static"))
-  (let ((target (getenv "HOST")))
-    (cond ((string-suffix? "-mingw32" target)
-           ;; Windows
-           (list zip
-                 (make-mingw-pthreads-cross-toolchain "x86_64-w64-mingw32")
-                 (make-nsis-with-sde-support nsis-x86_64)
-                 osslsigncode))
-          ((string-contains target "-linux-")
-           (list (make-bitcoin-cross-toolchain target)))
-          ((string-contains target "darwin")
-           (list clang-toolchain-10 binutils imagemagick libtiff librsvg font-tuffy cmake xorriso python-signapple))
-          (else '())))))
+        ;; HEBASTO
+        xgcc-x86_64)))
