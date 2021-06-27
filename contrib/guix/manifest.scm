@@ -131,9 +131,7 @@ chain for " target " development."))
       (home-page (package-home-page xgcc))
       (license (package-license xgcc)))))
 
-(define base-gcc
-  (package-with-extra-patches gcc-8
-    (search-our-patches "gcc-8-sort-libtool-find-output.patch")))
+(define base-gcc gcc-7)
 
 (define* (make-bitcoin-cross-toolchain target
                                        #:key
