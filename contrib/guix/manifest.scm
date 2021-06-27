@@ -563,6 +563,12 @@ and endian independent.")
 inspecting signatures in Mach-O binaries.")
       (license license:expat))))
 
+(define (make-glibc-without-ssp xglibc)
+  (package-with-extra-configure-variable
+    (package-with-extra-configure-variable
+      xglibc "libc_cv_ssp" "no")
+             "libc_cv_ssp_strong" "no"))
+
 (define-public glibc-2.24
   (package
     (inherit glibc)
@@ -580,11 +586,12 @@ inspecting signatures in Mach-O binaries.")
                                            "glibc-versioned-locpath.patch"
                                            "glibc-2.24-elfm-loadaddr-dynamic-rewrite.patch"
                                            "glibc-2.24-no-build-time-cxx-header-run.patch"))))))
+
 (define-public xgcc-x86_64
-  (let ((triplet "x86_64-linux-gnu"))
-    (cross-gcc triplet
-               #:xbinutils (cross-binutils triplet)
-               #:libc (cross-libc triplet glibc-2.24))))
+  (let ((target "x86_64-linux-gnu"))
+    (cross-gcc target
+               #:xbinutils (cross-binutils target)
+               #:libc (cross-libc target (make-glibc-without-ssp glibc-2.24)))))
 
 (packages->manifest
  (append
