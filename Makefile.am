@@ -376,5 +376,5 @@ if TARGET_WINDOWS
 endif
 if TARGET_LINUX
 	$(AM_V_at) CC='$(CC)' $(PYTHON) $(top_srcdir)/contrib/devtools/test-security-check.py TestSecurityChecks.test_ELF
-	$(AM_V_at) CC='$(CC)' CPPFILT='$(CPPFILT)' $(PYTHON) $(top_srcdir)/contrib/devtools/test-symbol-check.py TestSymbolChecks.test_ELF
+	$(AM_V_at) CC='$(CC)' $(PYTHON) $(top_srcdir)/contrib/devtools/test-symbol-check.py TestSymbolChecks.test_ELF
 endif
