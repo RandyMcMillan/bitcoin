@@ -11,7 +11,7 @@ Example usage:
     find ../path/to/binaries -type f -executable | xargs python3 contrib/devtools/symbol-check.py
 '''
 import sys
-from typing import List, Optional
+from typing import List
 
 import lief
 
@@ -146,9 +146,8 @@ def check_version(max_versions, version, arch) -> bool:
     else:
         return ver <= max_versions[lib][arch]
 
-def check_imported_symbols(filename) -> bool:
+def check_imported_symbols(binary) -> bool:
     ok: bool = True
-    binary = lief.parse(filename)
 
     for symbol in binary.imported_symbols:
         if not symbol.imported:
@@ -165,9 +164,8 @@ def check_imported_symbols(filename) -> bool:
                 ok = False
     return ok
 
-def check_exported_symbols(filename) -> bool:
+def check_exported_symbols(binary) -> bool:
     ok: bool = True
-    binary = lief.parse(filename)
 
     for symbol in binary.dynamic_symbols:
         if not symbol.exported:
@@ -175,22 +173,20 @@ def check_exported_symbols(filename) -> bool:
         name = symbol.name
         if is_RISCV(binary) or name in IGNORE_EXPORTS:
             continue
-        print(f'{filename}: export of symbol {name} not allowed!')
+        print(f'{binary.name}: export of symbol {name} not allowed!')
         ok = False
     return ok
 
-def check_ELF_libraries(filename) -> bool:
+def check_ELF_libraries(binary) -> bool:
     ok: bool = True
-    binary = lief.parse(filename)
     for library in binary.libraries:
         if library not in ELF_ALLOWED_LIBRARIES:
             print(f'{filename}: {library} is not in ALLOWED_LIBRARIES!')
             ok = False
     return ok
 
-def check_MACHO_libraries(filename) -> bool:
+def check_MACHO_libraries(binary) -> bool:
     ok: bool = True
-    binary = lief.parse(filename)
     for dylib in binary.libraries:
         split = dylib.name.split('/')
         if split[-1] not in MACHO_ALLOWED_LIBRARIES:
@@ -198,29 +194,25 @@ def check_MACHO_libraries(filename) -> bool:
             ok = False
     return ok
 
-def check_MACHO_min_os(filename) -> bool:
-    binary = lief.parse(filename)
+def check_MACHO_min_os(binary) -> bool:
     if binary.build_version.minos == [10,14,0]:
         return True
     return False
 
-def check_MACHO_sdk(filename) -> bool:
-    binary = lief.parse(filename)
+def check_MACHO_sdk(binary) -> bool:
     if binary.build_version.sdk == [10, 15, 6]:
         return True
     return False
 
-def check_PE_libraries(filename) -> bool:
+def check_PE_libraries(binary) -> bool:
     ok: bool = True
-    binary = lief.parse(filename)
     for dylib in binary.libraries:
         if dylib not in PE_ALLOWED_LIBRARIES:
             print(f'{dylib} is not in ALLOWED_LIBRARIES!')
             ok = False
     return ok
 
-def check_PE_subsystem_version(filename) -> bool:
-    binary = lief.parse(filename)
+def check_PE_subsystem_version(binary) -> bool:
     major: int = binary.optional_header.major_subsystem_version
     minor: int = binary.optional_header.minor_subsystem_version
     if major == 6 and minor == 1:
@@ -244,30 +236,20 @@ CHECKS = {
 ]
 }
 
-def identify_executable(executable) -> Optional[str]:
-    with open(filename, 'rb') as f:
-        magic = f.read(4)
-    if magic.startswith(b'MZ'):
-        return 'PE'
-    elif magic.startswith(b'\x7fELF'):
-        return 'ELF'
-    elif magic.startswith(b'\xcf\xfa'):
-        return 'MACHO'
-    return None
-
 if __name__ == '__main__':
     retval: int = 0
     for filename in sys.argv[1:]:
         try:
-            etype = identify_executable(filename)
-            if etype is None:
-                print(f'{filename}: unknown format')
+            binary = lief.parse(filename)
+            etype = binary.format.name
+            if etype == lief.EXE_FORMATS.UNKNOWN:
+                print(f'{filename}: unknown executable format')
                 retval = 1
                 continue
 
             failed: List[str] = []
             for (name, func) in CHECKS[etype]:
-                if not func(filename):
+                if not func(binary):
                     failed.append(name)
             if failed:
                 print(f'{filename}: failed {" ".join(failed)}')
