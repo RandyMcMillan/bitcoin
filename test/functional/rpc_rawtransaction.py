@@ -414,45 +414,47 @@ class RawTransactionsTest(BitcoinTestFramework):
         self.sync_all()
 
         # getrawtransaction tests
-        # 1. valid parameters - only supply txid
-        assert_equal(self.nodes[0].getrawtransaction(txId), rawTxSigned['hex'])
+        for n in [0, 3]:
+            self.log.info(f"Test getrawtransaction {'with' if n == 0 else 'without'} -txindex")
+            # 1. valid parameters - only supply txid
+            assert_equal(self.nodes[n].getrawtransaction(txId), rawTxSigned['hex'])
 
-        # 2. valid parameters - supply txid and 0 for non-verbose
-        assert_equal(self.nodes[0].getrawtransaction(txId, 0), rawTxSigned['hex'])
+            # 2. valid parameters - supply txid and 0 for non-verbose
+            assert_equal(self.nodes[n].getrawtransaction(txId, 0), rawTxSigned['hex'])
 
-        # 3. valid parameters - supply txid and False for non-verbose
-        assert_equal(self.nodes[0].getrawtransaction(txId, False), rawTxSigned['hex'])
+            # 3. valid parameters - supply txid and False for non-verbose
+            assert_equal(self.nodes[n].getrawtransaction(txId, False), rawTxSigned['hex'])
 
-        # 4. valid parameters - supply txid and 1 for verbose.
-        # We only check the "hex" field of the output so we don't need to update this test every time the output format changes.
-        assert_equal(self.nodes[0].getrawtransaction(txId, 1)["hex"], rawTxSigned['hex'])
+            # 4. valid parameters - supply txid and 1 for verbose.
+            # We only check the "hex" field of the output so we don't need to update this test every time the output format changes.
+            assert_equal(self.nodes[n].getrawtransaction(txId, 1)["hex"], rawTxSigned['hex'])
 
-        # 5. valid parameters - supply txid and True for non-verbose
-        assert_equal(self.nodes[0].getrawtransaction(txId, True)["hex"], rawTxSigned['hex'])
+            # 5. valid parameters - supply txid and True for non-verbose
+            assert_equal(self.nodes[n].getrawtransaction(txId, True)["hex"], rawTxSigned['hex'])
 
-        # 6. invalid parameters - supply txid and string "Flase"
-        assert_raises_rpc_error(-1, "not a boolean", self.nodes[0].getrawtransaction, txId, "Flase")
+            # 6. invalid parameters - supply txid and string "Flase"
+            assert_raises_rpc_error(-1, "not a boolean", self.nodes[n].getrawtransaction, txId, "Flase")
 
-        # 7. invalid parameters - supply txid and empty array
-        assert_raises_rpc_error(-1, "not a boolean", self.nodes[0].getrawtransaction, txId, [])
+            # 7. invalid parameters - supply txid and empty array
+            assert_raises_rpc_error(-1, "not a boolean", self.nodes[n].getrawtransaction, txId, [])
 
-        # 8. invalid parameters - supply txid and empty dict
-        assert_raises_rpc_error(-1, "not a boolean", self.nodes[0].getrawtransaction, txId, {})
+            # 8. invalid parameters - supply txid and empty dict
+            assert_raises_rpc_error(-1, "not a boolean", self.nodes[n].getrawtransaction, txId, {})
 
-        # 9. invalid parameters - sequence out of range
-        for invalid_seq in [-1, 4294967296]:
-            inputs  = [{'txid': TXID, 'vout': 1, 'sequence': invalid_seq}]
-            outputs = {self.nodes[0].getnewaddress(): 1}
-            assert_raises_rpc_error(-8, 'Invalid parameter, sequence number is out of range',
-                                    self.nodes[0].createrawtransaction, inputs, outputs)
+            # 9. invalid parameters - sequence out of range
+            for invalid_seq in [-1, 4294967296]:
+                inputs = [{'txid': TXID, 'vout': 1, 'sequence': invalid_seq}]
+                outputs = {self.nodes[n].getnewaddress(): 1}
+                assert_raises_rpc_error(-8, 'Invalid parameter, sequence number is out of range',
+                                        self.nodes[n].createrawtransaction, inputs, outputs)
 
-        # 10. valid sequence numbers
-        for valid_seq in [1000, 4294967294]:
-            inputs  = [{'txid': TXID, 'vout': 1, 'sequence': valid_seq}]
-            outputs = {self.nodes[0].getnewaddress(): 1}
-            rawtx   = self.nodes[0].createrawtransaction(inputs, outputs)
-            decrawtx= self.nodes[0].decoderawtransaction(rawtx)
-            assert_equal(decrawtx['vin'][0]['sequence'], valid_seq)
+            # 10. valid sequence numbers
+            for valid_seq in [1000, 4294967294]:
+                inputs = [{'txid': TXID, 'vout': 1, 'sequence': valid_seq}]
+                outputs = {self.nodes[n].getnewaddress(): 1}
+                rawtx = self.nodes[n].createrawtransaction(inputs, outputs)
+                decrawtx = self.nodes[n].decoderawtransaction(rawtx)
+                assert_equal(decrawtx['vin'][0]['sequence'], valid_seq)
 
         ####################################
         # TRANSACTION VERSION NUMBER TESTS #
