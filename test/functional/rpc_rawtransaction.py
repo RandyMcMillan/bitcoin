@@ -52,13 +52,14 @@ class multidict(dict):
 class RawTransactionsTest(BitcoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
-        self.num_nodes = 5
+        self.num_nodes = 6
         self.extra_args = [
             ["-txindex"],
             ["-txindex"],
             ["-txindex"],
             [],
             ["-blocksonly"],
+            ["-txindex", "-blocksonly"],
         ]
         # whitelist all peers to speed up tx relay / mempool sync
         for args in self.extra_args:
@@ -120,11 +121,14 @@ class RawTransactionsTest(BitcoinTestFramework):
             " blockchain transaction queries. Use gettransaction for wallet transactions."
         )
 
-        for n in [0, 3, 4]:
-            self.log.info(f"Test getrawtransaction {'with' if n == 0 else 'without'} -txindex, {'with' if n == 4 else 'without'} -blocksonly")
+        for n in [0, 3, 4, 5]:
+            self.log.info(
+                f"Test getrawtransaction {'with' if n == 0 or n == 5 else 'without'} -txindex,"
+                f" {'with' if n >= 4 else 'without'} -blocksonly"
+            )
 
             # 1. valid parameters - supply txid along with various valid values for verbose
-            if n == 0:
+            if n == 0 or n == 5:
                 # with -txindex
                 for verbose in [None, 0, False]:
                     gottx = self.nodes[n].getrawtransaction(txId, verbose)
