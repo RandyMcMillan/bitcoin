@@ -72,18 +72,24 @@ class RawTransactionsTest(BitcoinTestFramework):
         super().setup_network()
         self.connect_nodes(0, 2)
 
+    def sync_peers(self):
+        self.sync_mempools(self.nodes[0:3])
+        self.sync_blocks()
+
+    def generate_and_sync(self, node, blocks, pre_sync=True):
+        if pre_sync == True:
+            self.sync_peers()
+        self.nodes[node].generate(blocks)
+        self.sync_peers()
+
     def run_test(self):
         self.log.info("Prepare some coins for multiple *rawtransaction commands")
-        self.nodes[2].generate(1)
-        self.sync_all()
-        self.nodes[0].generate(COINBASE_MATURITY + 1)
-        self.sync_all()
+        self.generate_and_sync(node=2, blocks=1)
+        self.generate_and_sync(node=0, blocks=COINBASE_MATURITY + 1)
         self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 1.5)
         self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 1.0)
         self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 5.0)
-        self.sync_all()
-        self.nodes[0].generate(5)
-        self.sync_all()
+        self.generate_and_sync(node=0, blocks=5)
 
         self.getrawtransaction_tests()
         self.createrawtransaction_tests()
@@ -97,14 +103,12 @@ class RawTransactionsTest(BitcoinTestFramework):
     def getrawtransaction_tests(self):
         addr = self.nodes[1].getnewaddress()
         txid = self.nodes[0].sendtoaddress(addr, 10)
-        self.nodes[0].generate(1)
-        self.sync_all()
+        self.generate_and_sync(node=0, blocks=1)
         vout = find_vout_for_address(self.nodes[1], txid, addr)
         rawTx = self.nodes[1].createrawtransaction([{'txid': txid, 'vout': vout}], {self.nodes[1].getnewaddress(): 9.999})
         rawTxSigned = self.nodes[1].signrawtransactionwithwallet(rawTx)
         txId = self.nodes[1].sendrawtransaction(rawTxSigned['hex'])
-        self.nodes[0].generate(1)
-        self.sync_all()
+        self.generate_and_sync(node=0, blocks=1, pre_sync=False)
 
         for n in [0, 3]:
             self.log.info(f"Test getrawtransaction {'with' if n == 0 else 'without'} -txindex")
@@ -151,7 +155,8 @@ class RawTransactionsTest(BitcoinTestFramework):
         # Make a tx by sending, then generate 2 blocks; block1 has the tx in it
         tx = self.nodes[2].sendtoaddress(self.nodes[1].getnewaddress(), 1)
         block1, block2 = self.nodes[2].generate(2)
-        self.sync_all()
+        self.sync_peers()
+
         for n in [0, 3]:
             self.log.info(f"Test getrawtransaction {'with' if n == 0 else 'without'} -txindex, with blockhash")
             # We should be able to get the raw transaction by providing the correct block
@@ -328,7 +333,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         rawTx = self.nodes[0].getrawtransaction(txId, True)
         vout = next(o for o in rawTx['vout'] if o['value'] == Decimal('1.00000000'))
 
-        self.sync_all()
+        self.sync_peers()
         inputs = [{"txid": txId, "vout": vout['n']}]
         # Fee 10,000 satoshis, (1 - (10000 sat * 0.00000001 BTC/sat)) = 0.9999
         outputs = {self.nodes[0].getnewaddress(): Decimal("0.99990000")}
@@ -352,7 +357,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         rawTx = self.nodes[0].getrawtransaction(txId, True)
         vout = next(o for o in rawTx['vout'] if o['value'] == Decimal('1.00000000'))
 
-        self.sync_all()
+        self.sync_peers()
         inputs = [{"txid": txId, "vout": vout['n']}]
         # Fee 2,000,000 satoshis, (1 - (2000000 sat * 0.00000001 BTC/sat)) = 0.98
         outputs = {self.nodes[0].getnewaddress() : Decimal("0.98000000")}
@@ -431,9 +436,7 @@ class RawTransactionsTest(BitcoinTestFramework):
 
         # send 1.2 BTC to msig adr
         txId = self.nodes[0].sendtoaddress(mSigObj, 1.2)
-        self.sync_all()
-        self.nodes[0].generate(1)
-        self.sync_all()
+        self.generate_and_sync(node=0, blocks=1)
         assert_equal(self.nodes[2].getbalance(), bal+Decimal('1.20000000')) #node2 has both keys of the 2of2 ms addr., tx should affect the balance
 
 
@@ -452,9 +455,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         txId = self.nodes[0].sendtoaddress(mSigObj, 2.2)
         decTx = self.nodes[0].gettransaction(txId)
         rawTx = self.nodes[0].decoderawtransaction(decTx['hex'])
-        self.sync_all()
-        self.nodes[0].generate(1)
-        self.sync_all()
+        self.generate_and_sync(node=0, blocks=1)
 
         # THIS IS AN INCOMPLETE FEATURE
         # NODE2 HAS TWO OF THREE KEY AND THE FUNDS SHOULD BE SPENDABLE AND COUNT AT BALANCE CALCULATION
@@ -475,9 +476,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         assert_equal(rawTxSigned['complete'], True)  # node2 can sign the tx compl., own two of three keys
         self.nodes[2].sendrawtransaction(rawTxSigned['hex'])
         rawTx = self.nodes[0].decoderawtransaction(rawTxSigned['hex'])
-        self.sync_all()
-        self.nodes[0].generate(1)
-        self.sync_all()
+        self.generate_and_sync(node=0, blocks=1)
         assert_equal(self.nodes[0].getbalance(), bal + Decimal('50.00000000') + Decimal('2.19000000'))  # block reward + tx
 
         # 2of2 test for combining transactions
@@ -495,9 +494,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         txId = self.nodes[0].sendtoaddress(mSigObj, 2.2)
         decTx = self.nodes[0].gettransaction(txId)
         rawTx2 = self.nodes[0].decoderawtransaction(decTx['hex'])
-        self.sync_all()
-        self.nodes[0].generate(1)
-        self.sync_all()
+        self.generate_and_sync(node=0, blocks=1)
 
         assert_equal(self.nodes[2].getbalance(), bal)  # the funds of a 2of2 multisig tx should not be marked as spendable
 
@@ -520,9 +517,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         self.log.debug(rawTxComb)
         self.nodes[2].sendrawtransaction(rawTxComb)
         rawTx2 = self.nodes[0].decoderawtransaction(rawTxComb)
-        self.sync_all()
-        self.nodes[0].generate(1)
-        self.sync_all()
+        self.generate_and_sync(node=0, blocks=1)
         assert_equal(self.nodes[0].getbalance(), bal + Decimal('50.00000000') + Decimal('2.19000000'))  # block reward + tx
 
 
