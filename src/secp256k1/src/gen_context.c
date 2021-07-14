@@ -13,6 +13,8 @@
 /* We can't require the precomputed tables when creating them. */
 #undef USE_ECMULT_STATIC_PRECOMPUTATION
 
+#undef USE_ASM_X86_64
+
 #include "include/secp256k1.h"
 #include "assumptions.h"
 #include "util.h"
