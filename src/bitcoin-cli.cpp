@@ -63,7 +63,7 @@ static void SetupCliArgs(ArgsManager& argsman)
     argsman.AddArg("-generate", strprintf("Generate blocks immediately, equivalent to RPC getnewaddress followed by RPC generatetoaddress. Optional positional integer arguments are number of blocks to generate (default: %s) and maximum iterations to try (default: %s), equivalent to RPC generatetoaddress nblocks and maxtries arguments. Example: bitcoin-cli -generate 4 1000", DEFAULT_NBLOCKS, DEFAULT_MAX_TRIES), ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     argsman.AddArg("-addrinfo", "Get the number of addresses known to the node, per network and total.", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     argsman.AddArg("-getinfo", "Get general information from the remote server. Note that unlike server-side RPC calls, the results of -getinfo is the result of multiple non-atomic requests. Some entries in the result may represent results from different states (e.g. wallet balance may be as of a different block from the chain state reported)", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
-    argsman.AddArg("-netinfo", "Get network peer connection information from the remote server. An optional integer argument from 0 to 4 can be passed for different peers listings (default: 0). Pass \"help\" for detailed help documentation.", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
+    argsman.AddArg("-netinfo", "Get network peer connection information from the remote server. An optional integer argument from 0 to 5 can be passed for different peers listings (default: 0). Pass \"help\" for detailed help documentation.", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
 
     SetupChainParamsBaseOptions(argsman);
     argsman.AddArg("-named", strprintf("Pass named instead of positional arguments (default: %s)", DEFAULT_NAMED), ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
@@ -357,7 +357,7 @@ public:
 class NetinfoRequestHandler : public BaseRequestHandler
 {
 private:
-    static constexpr uint8_t MAX_DETAIL_LEVEL{4};
+    static constexpr uint8_t MAX_DETAIL_LEVEL{5};
     static constexpr std::array m_networks{"ipv4", "ipv6", "onion", "i2p"};
     std::array<std::array<uint16_t, m_networks.size() + 1>, 3> m_counts{{{}}}; //!< Peer counts by (in/out/total, networks/total)
     uint8_t m_block_relay_peers_count{0};
@@ -370,9 +370,10 @@ private:
         return UNKNOWN_NETWORK;
     }
     uint8_t m_details_level{0}; //!< Optional user-supplied arg to set dashboard details level
-    bool DetailsRequested() const { return m_details_level > 0 && m_details_level < 5; }
-    bool IsAddressSelected() const { return m_details_level == 2 || m_details_level == 4; }
-    bool IsVersionSelected() const { return m_details_level == 3 || m_details_level == 4; }
+    bool DetailsRequested() const { return m_details_level != 0; }
+    bool IsAddressSelected() const { return m_details_level == 2 || m_details_level >= 4; }
+    bool IsVersionSelected() const { return m_details_level == 3 || m_details_level >= 4; }
+    bool IsAddrStatsSelected() const { return m_details_level >= 5; }
     bool m_is_asmap_on{false};
     size_t m_max_addr_length{0};
     size_t m_max_addr_processed_length{6};
@@ -507,7 +508,7 @@ public:
         if (DetailsRequested() && !m_peers.empty()) {
             std::sort(m_peers.begin(), m_peers.end());
             result += strprintf("<->   type   net  mping   ping send recv  txn  blk  hb %*s", m_max_age_length, "age");
-            result += strprintf("%*s%*s", m_max_addr_rate_limited_length, "addrl", m_max_addr_processed_length, "addrp");
+            if (IsAddrStatsSelected()) result += strprintf("%*s%*s", m_max_addr_rate_limited_length, "addrl", m_max_addr_processed_length, "addrp");
             if (m_is_asmap_on) result += "  asmap";
             result += strprintf(" %*s %-*s%s\n", m_max_id_length, "id", IsAddressSelected() ? m_max_addr_length : 0, IsAddressSelected() ? "address" : "", IsVersionSelected() ? "version" : "");
             for (const Peer& peer : m_peers) {
@@ -526,10 +527,10 @@ public:
                     strprintf("%s%s", peer.is_bip152_hb_to ? "." : " ", peer.is_bip152_hb_from ? "*" : " "),
                     m_max_age_length, // variable spacing
                     peer.age,
-                    m_max_addr_rate_limited_length, // variable spacing
-                    peer.addr_rate_limited ? ToString(peer.addr_rate_limited) : "",
-                    m_max_addr_processed_length, // variable spacing
-                    peer.addr_processed ? ToString(peer.addr_processed) : "",
+                    IsAddrStatsSelected() ? m_max_addr_rate_limited_length : 0, // variable spacing
+                    IsAddrStatsSelected() && peer.addr_rate_limited ? ToString(peer.addr_rate_limited) : "",
+                    IsAddrStatsSelected() ? m_max_addr_processed_length : 0, // variable spacing
+                    IsAddrStatsSelected() && peer.addr_processed ? ToString(peer.addr_processed) : "",
                     m_is_asmap_on ? 7 : 0, // variable spacing
                     m_is_asmap_on && peer.mapped_as != 0 ? ToString(peer.mapped_as) : "",
                     m_max_id_length, // variable spacing
@@ -592,6 +593,7 @@ public:
         "                                  2 - Like 1 but with an address column\n"
         "                                  3 - Like 1 but with a version column\n"
         "                                  4 - Like 1 but with both address and version columns\n"
+        "                                  5 - Like 4 but with additional data for development and testing purposes\n"
         "2. help (string \"help\", optional) Print this help documentation instead of the dashboard.\n\n"
         "Result:\n\n"
         + strprintf("* The peers listing in levels 1-%d displays all of the peers sorted by direction and minimum ping time:\n\n", MAX_DETAIL_LEVEL) +
