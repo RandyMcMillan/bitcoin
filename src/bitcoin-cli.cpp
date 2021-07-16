@@ -44,6 +44,7 @@ static constexpr int DEFAULT_WAIT_CLIENT_TIMEOUT = 0;
 static const bool DEFAULT_NAMED=false;
 static const int CONTINUE_EXECUTION=-1;
 static constexpr int8_t UNKNOWN_NETWORK{-1};
+static constexpr uint8_t NETINFO_MAX_DETAIL_LEVEL{5};
 
 /** Default number of blocks to generate for RPC generatetoaddress. */
 static const std::string DEFAULT_NBLOCKS = "1";
@@ -63,8 +64,7 @@ static void SetupCliArgs(ArgsManager& argsman)
     argsman.AddArg("-generate", strprintf("Generate blocks immediately, equivalent to RPC getnewaddress followed by RPC generatetoaddress. Optional positional integer arguments are number of blocks to generate (default: %s) and maximum iterations to try (default: %s), equivalent to RPC generatetoaddress nblocks and maxtries arguments. Example: bitcoin-cli -generate 4 1000", DEFAULT_NBLOCKS, DEFAULT_MAX_TRIES), ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     argsman.AddArg("-addrinfo", "Get the number of addresses known to the node, per network and total.", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     argsman.AddArg("-getinfo", "Get general information from the remote server. Note that unlike server-side RPC calls, the results of -getinfo is the result of multiple non-atomic requests. Some entries in the result may represent results from different states (e.g. wallet balance may be as of a different block from the chain state reported)", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
-    argsman.AddArg("-netinfo", "Get network peer connection information from the remote server. An optional integer argument from 0 to 5 can be passed for different peers listings (default: 0). Pass \"help\" for detailed help documentation.", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
-
+    argsman.AddArg("-netinfo", strprintf("Get network peer connection information from the remote server. An optional integer argument from 0 to %u can be passed for different peers listings (default: 0). Pass \"help\" for detailed help documentation.", NETINFO_MAX_DETAIL_LEVEL), ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     SetupChainParamsBaseOptions(argsman);
     argsman.AddArg("-named", strprintf("Pass named instead of positional arguments (default: %s)", DEFAULT_NAMED), ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     argsman.AddArg("-rpcclienttimeout=<n>", strprintf("Timeout in seconds during HTTP requests, or 0 for no timeout. (default: %d)", DEFAULT_HTTP_CLIENT_TIMEOUT), ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
@@ -357,7 +357,6 @@ public:
 class NetinfoRequestHandler : public BaseRequestHandler
 {
 private:
-    static constexpr uint8_t MAX_DETAIL_LEVEL{5};
     static constexpr std::array m_networks{"ipv4", "ipv6", "onion", "i2p"};
     std::array<std::array<uint16_t, m_networks.size() + 1>, 3> m_counts{{{}}}; //!< Peer counts by (in/out/total, networks/total)
     uint8_t m_block_relay_peers_count{0};
@@ -436,7 +435,7 @@ public:
         if (!args.empty()) {
             uint8_t n{0};
             if (ParseUInt8(args.at(0), &n)) {
-                m_details_level = std::min(n, MAX_DETAIL_LEVEL);
+                m_details_level = std::min(n, NETINFO_MAX_DETAIL_LEVEL);
             } else {
                 throw std::runtime_error(strprintf("invalid -netinfo argument: %s\nFor more information, run: bitcoin-cli -netinfo help", args.at(0)));
             }
@@ -582,12 +581,12 @@ public:
         "Returns a network peer connections dashboard with information from the remote server.\n"
         "This human-readable interface will change regularly and is not intended to be a stable API.\n"
         "Under the hood, -netinfo fetches the data by calling getpeerinfo and getnetworkinfo.\n"
-        + strprintf("An optional integer argument from 0 to %d can be passed for different peers listings; %d to 255 are parsed as %d.\n", MAX_DETAIL_LEVEL, MAX_DETAIL_LEVEL, MAX_DETAIL_LEVEL) +
+        + strprintf("An optional integer argument from 0 to %u can be passed for different peers listings; %u to 255 are parsed as %u.\n", NETINFO_MAX_DETAIL_LEVEL, NETINFO_MAX_DETAIL_LEVEL, NETINFO_MAX_DETAIL_LEVEL) +
         "Pass \"help\" to see this detailed help documentation.\n"
         "If more than one argument is passed, only the first one is read and parsed.\n"
         "Suggestion: use with the Linux watch(1) command for a live dashboard; see example below.\n\n"
         "Arguments:\n"
-        + strprintf("1. level (integer 0-%d, optional)  Specify the info level of the peers dashboard (default 0):\n", MAX_DETAIL_LEVEL) +
+        + strprintf("1. level (integer 0-%u, optional)  Specify the info level of the peers dashboard (default 0):\n", NETINFO_MAX_DETAIL_LEVEL) +
         "                                  0 - Connection counts and local addresses\n"
         "                                  1 - Like 0 but with a peers listing (without address or version columns)\n"
         "                                  2 - Like 1 but with an address column\n"
@@ -596,7 +595,7 @@ public:
         "                                  5 - Like 4 but with additional data for development and testing purposes\n"
         "2. help (string \"help\", optional) Print this help documentation instead of the dashboard.\n\n"
         "Result:\n\n"
-        + strprintf("* The peers listing in levels 1-%d displays all of the peers sorted by direction and minimum ping time:\n\n", MAX_DETAIL_LEVEL) +
+        + strprintf("* The peers listing in levels 1-%u displays all of the peers sorted by direction and minimum ping time:\n\n", NETINFO_MAX_DETAIL_LEVEL) +
         "  Column   Description\n"
         "  ------   -----------\n"
         "  <->      Direction\n"
@@ -635,9 +634,9 @@ public:
         "Compact peers listing\n"
         "> bitcoin-cli -netinfo 1\n\n"
         "Full dashboard\n"
-        + strprintf("> bitcoin-cli -netinfo %d\n\n", MAX_DETAIL_LEVEL) +
+        + strprintf("> bitcoin-cli -netinfo %u\n\n", NETINFO_MAX_DETAIL_LEVEL) +
         "Full live dashboard, adjust --interval or --no-title as needed (Linux)\n"
-        + strprintf("> watch --interval 1 --no-title bitcoin-cli -netinfo %d\n\n", MAX_DETAIL_LEVEL) +
+        + strprintf("> watch --interval 1 --no-title bitcoin-cli -netinfo %u\n\n", NETINFO_MAX_DETAIL_LEVEL) +
         "See this help\n"
         "> bitcoin-cli -netinfo help\n"};
 };
