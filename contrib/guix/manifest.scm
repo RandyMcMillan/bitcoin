@@ -84,6 +84,22 @@ http://www.linuxfromscratch.org/hlfs/view/development/chapter05/gcc-pass1.html"
   (package-with-extra-patches xbinutils
     (search-our-patches "binutils-mingw-w64-disable-flags.patch")))
 
+(define (bitcoin-cross-gcc-sans-libc target xgcc xbinutils)
+  (package
+    (inherit (cross-gcc target
+                        #:xgcc xgcc
+                        #:xbinutils xbinutils))
+    (arguments
+     (substitute-keyword-arguments (package-arguments xgcc)
+       ((#:make-flags flags)
+        `(cons "inhibit_libc=true" ,flags))
+       ((#:phases phases)
+        `(modify-phases ,phases
+           (add-before 'configure 'setenv
+             (lambda* (#:key outputs #:allow-other-keys)
+               (let* ((gcc (assoc-ref %build-inputs "gcc")))
+                 (setenv "CPP" (string-append gcc "/bin/gcc -E ")))))))))))
+
 (define (make-cross-toolchain target
                               base-gcc-for-libc
                               base-kernel-headers
@@ -93,9 +109,9 @@ http://www.linuxfromscratch.org/hlfs/view/development/chapter05/gcc-pass1.html"
   (let* ((xbinutils (cross-binutils target))
          ;; 1. Build a cross-compiling gcc without targeting any libc, derived
          ;; from BASE-GCC-FOR-LIBC
-         (xgcc-sans-libc (cross-gcc target
-                                    #:xgcc base-gcc-for-libc
-                                    #:xbinutils xbinutils))
+         (xgcc-sans-libc (bitcoin-cross-gcc-sans-libc target
+                                                      base-gcc-for-libc
+                                                      xbinutils))
          ;; 2. Build cross-compiled kernel headers with XGCC-SANS-LIBC, derived
          ;; from BASE-KERNEL-HEADERS
          (xkernel (cross-kernel-headers target
