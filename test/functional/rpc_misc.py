@@ -54,12 +54,18 @@ class RpcMiscTest(BitcoinTestFramework):
 
         assert_raises_rpc_error(-8, "unknown mode foobar", node.getmemoryinfo, mode="foobar")
 
-        self.log.info("test logging")
+        self.log.info("test logging rpc and help")
+        # Test toggling a logging category on/off/on with the logging RPC.
         assert_equal(node.logging()['qt'], True)
         node.logging(exclude=['qt'])
         assert_equal(node.logging()['qt'], False)
         node.logging(include=['qt'])
         assert_equal(node.logging()['qt'], True)
+        # Expect logging RPC and help to return the logging categories in alphabetical order.
+        sorted_categories = sorted(node.logging())
+        assert_equal(list(node.logging()), sorted_categories)
+        first_3_categories = ', '.join(sorted_categories[0:3])
+        assert f"logging categories are: {first_3_categories}" in self.nodes[0].help('logging')
 
         self.log.info("test echoipc (testing spawned process in multiprocess build)")
         assert_equal(node.echoipc("hello"), "hello")
