@@ -124,14 +124,12 @@ bool BCLog::Logger::DefaultShrinkDebugFile() const
     return m_categories == BCLog::NONE;
 }
 
-struct CLogCategoryDesc
-{
+struct CLogCategoryDesc {
     BCLog::LogFlags flag;
     std::string category;
 };
 
-const CLogCategoryDesc LogCategories[] =
-{
+const std::array<CLogCategoryDesc, 28> LogCategories{{
     {BCLog::NONE, "0"},
     {BCLog::NONE, "none"},
     {BCLog::NET, "net"},
@@ -160,7 +158,7 @@ const CLogCategoryDesc LogCategories[] =
     {BCLog::IPC, "ipc"},
     {BCLog::ALL, "1"},
     {BCLog::ALL, "all"},
-};
+}};
 
 bool GetLogCategory(BCLog::LogFlags& flag, const std::string& str)
 {
@@ -179,8 +177,12 @@ bool GetLogCategory(BCLog::LogFlags& flag, const std::string& str)
 
 std::vector<LogCategory> BCLog::Logger::LogCategoriesList() const
 {
+    // Sort log categories by alphabetical order.
+    auto categories{LogCategories};
+    std::sort(categories.begin(), categories.end(), [](auto a, auto b) { return a.category < b.category; });
+
     std::vector<LogCategory> ret;
-    for (const CLogCategoryDesc& category_desc : LogCategories) {
+    for (const CLogCategoryDesc& category_desc : categories) {
         // Omit the special cases.
         if (category_desc.flag != BCLog::NONE && category_desc.flag != BCLog::ALL) {
             LogCategory catActive;
