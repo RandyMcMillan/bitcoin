@@ -16,13 +16,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys, re, os, shutil, stat, os.path
+import sys, re, os, platform, shutil, stat, subprocess, os.path
 from argparse import ArgumentParser
-from ds_store import DSStore
-from mac_alias import Alias
 from pathlib import Path
 from subprocess import PIPE, run
 from typing import List, Optional
+from ds_store import DSStore
+from mac_alias import Alias
 
 # This is ported from the original macdeployqt with modifications
 
@@ -288,6 +288,8 @@ def copyFramework(framework: FrameworkInfo, path: str, verbose: int) -> Optional
     return toPath
 
 def deployFrameworks(frameworks: List[FrameworkInfo], bundlePath: str, binaryPath: str, strip: bool, verbose: int, deploymentInfo: Optional[DeploymentInfo] = None) -> DeploymentInfo:
+    global need_to_sign_target
+
     if deploymentInfo is None:
         deploymentInfo = DeploymentInfo()
     
@@ -304,7 +306,9 @@ def deployFrameworks(frameworks: List[FrameworkInfo], bundlePath: str, binaryPat
         if framework.installName.startswith("@executable_path") or framework.installName.startswith(bundlePath):
             print(framework.frameworkName, "already deployed, skipping.")
             continue
-        
+
+        need_to_sign_target = True
+
         # install_name_tool the new id into the binary
         changeInstallName(framework.installName, framework.deployedInstallName, binaryPath, verbose)
         
@@ -427,6 +431,7 @@ if os.path.exists(appname + ".temp.dmg"):
 # ------------------------------------------------
 
 target = os.path.join("dist", "Bitcoin-Qt.app")
+need_to_sign_target = False
 
 print("+ Copying source bundle +")
 if verbose:
@@ -540,6 +545,9 @@ ds.flush()
 ds.close()
 
 # ------------------------------------------------
+
+if need_to_sign_target and platform.system() == "Darwin" and platform.machine() == "arm64":
+    subprocess.check_call(f"codesign --deep --force --sign - {target}", shell=True)
 
 if config.dmg is not None:
 
