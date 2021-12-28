@@ -12,8 +12,8 @@
 #include <qt/clientmodel.h>
 #include <qt/guiutil.h>
 #include <qt/peertablemodel.h>
-#include <qt/mempoolstats.h>
-#include <qt/mempooldetail.h>
+#include <qt/mempool_tab/mempoolstats.h>
+#include <qt/mempool_tab/mempooldetail.h>
 
 #include <net.h>
 
