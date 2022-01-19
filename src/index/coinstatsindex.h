@@ -36,6 +36,9 @@ private:
 
     bool ReverseBlock(const CBlock& block, const CBlockIndex* pindex);
 
+    /// Get the name of the index for display in logs.
+    const char* GetIndexName() const override { return "coinstatsindex"; }
+
 protected:
     bool Init() override;
 
@@ -44,8 +47,6 @@ protected:
     bool Rewind(const CBlockIndex* current_tip, const CBlockIndex* new_tip) override;
 
     BaseIndex::DB& GetDB() const override { return *m_db; }
-
-    const char* GetIndexName() const override { return "coinstatsindex"; }
 
 public:
     // Constructs the index, which becomes available to be queried.

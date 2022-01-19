@@ -75,6 +75,10 @@ private:
     /// to a chain reorganization), the index must halt until Commit succeeds or else it could end up
     /// getting corrupted.
     bool Commit();
+
+    /// Get the name of the index for display in logs.
+    virtual const char* GetIndexName() const = 0;
+
 protected:
     CChainState* m_chainstate{nullptr};
 
@@ -99,9 +103,6 @@ protected:
     virtual bool Rewind(const CBlockIndex* current_tip, const CBlockIndex* new_tip);
 
     virtual DB& GetDB() const = 0;
-
-    /// Get the name of the index for display in logs.
-    virtual const char* GetIndexName() const = 0;
 
 public:
     /// Destructor interrupts sync thread if running and blocks until it exits.
