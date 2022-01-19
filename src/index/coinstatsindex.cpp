@@ -349,7 +349,7 @@ bool CoinStatsIndex::Init()
         // failure, and starting the index would cause further corruption.
         if (m_db->Exists(DB_MUHASH)) {
             return error("%s: Cannot read current %s state; index may be corrupted",
-                         __func__, GetName());
+                         __func__, GetIndexName());
         }
     }
 

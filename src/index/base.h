@@ -101,7 +101,7 @@ protected:
     virtual DB& GetDB() const = 0;
 
     /// Get the name of the index for display in logs.
-    virtual const char* GetName() const = 0;
+    virtual const char* GetIndexName() const = 0;
 
 public:
     /// Destructor interrupts sync thread if running and blocks until it exits.

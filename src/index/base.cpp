@@ -105,7 +105,7 @@ bool BaseIndex::Init()
             }
         }
         if (prune_violation) {
-            return InitError(strprintf(Untranslated("%s best block of the index goes beyond pruned data. Please disable the index or reindex (which will download the whole blockchain again)"), GetName()));
+            return InitError(strprintf(Untranslated("%s best block of the index goes beyond pruned data. Please disable the index or reindex (which will download the whole blockchain again)"), GetIndexName()));
         }
     }
     return true;
@@ -158,7 +158,7 @@ void BaseIndex::ThreadSync()
                 }
                 if (pindex_next->pprev != pindex && !Rewind(pindex, pindex_next->pprev)) {
                     FatalError("%s: Failed to rewind index %s to a previous chain tip",
-                               __func__, GetName());
+                               __func__, GetIndexName());
                     return;
                 }
                 pindex = pindex_next;
@@ -167,7 +167,7 @@ void BaseIndex::ThreadSync()
             int64_t current_time = GetTime();
             if (last_log_time + SYNC_LOG_INTERVAL < current_time) {
                 LogPrintf("Syncing %s with block chain from height %d\n",
-                          GetName(), pindex->nHeight);
+                          GetIndexName(), pindex->nHeight);
                 last_log_time = current_time;
             }
 
@@ -193,9 +193,9 @@ void BaseIndex::ThreadSync()
     }
 
     if (pindex) {
-        LogPrintf("%s is enabled at height %d\n", GetName(), pindex->nHeight);
+        LogPrintf("%s is enabled at height %d\n", GetIndexName(), pindex->nHeight);
     } else {
-        LogPrintf("%s is enabled\n", GetName());
+        LogPrintf("%s is enabled\n", GetIndexName());
     }
 }
 
@@ -203,7 +203,7 @@ bool BaseIndex::Commit()
 {
     CDBBatch batch(GetDB());
     if (!CommitInternal(batch) || !GetDB().WriteBatch(batch)) {
-        return error("%s: Failed to commit latest %s state", __func__, GetName());
+        return error("%s: Failed to commit latest %s state", __func__, GetIndexName());
     }
     return true;
 }
@@ -263,7 +263,7 @@ void BaseIndex::BlockConnected(const std::shared_ptr<const CBlock>& block, const
         }
         if (best_block_index != pindex->pprev && !Rewind(best_block_index, pindex->pprev)) {
             FatalError("%s: Failed to rewind index %s to a previous chain tip",
-                       __func__, GetName());
+                       __func__, GetIndexName());
             return;
         }
     }
@@ -335,7 +335,7 @@ bool BaseIndex::BlockUntilSyncedToCurrentChain() const
         }
     }
 
-    LogPrintf("%s: %s is catching up on block notifications\n", __func__, GetName());
+    LogPrintf("%s: %s is catching up on block notifications\n", __func__, GetIndexName());
     SyncWithValidationInterfaceQueue();
     return true;
 }
@@ -355,7 +355,7 @@ bool BaseIndex::Start(CChainState& active_chainstate)
         return false;
     }
 
-    m_thread_sync = std::thread(&util::TraceThread, GetName(), [this] { ThreadSync(); });
+    m_thread_sync = std::thread(&util::TraceThread, GetIndexName(), [this] { ThreadSync(); });
     return true;
 }
 
@@ -371,7 +371,7 @@ void BaseIndex::Stop()
 IndexSummary BaseIndex::GetSummary() const
 {
     IndexSummary summary{};
-    summary.name = GetName();
+    summary.name = GetIndexName();
     summary.synced = m_synced;
     summary.best_block_height = m_best_block_index ? m_best_block_index.load()->nHeight : 0;
     return summary;
