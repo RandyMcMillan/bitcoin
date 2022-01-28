@@ -641,6 +641,22 @@ bool RPCConsole::eventFilter(QObject* obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
+std::string uint8_vector_to_hex_string(const std::vector<uint8_t>& v)
+{
+    std::string result;
+    result.reserve(v.size() * 2);   // two digits per character
+
+    static constexpr char hex[] = "0123456789ABCDEF";
+
+    for (uint8_t c : v)
+    {
+        result.push_back(hex[c / 16]);
+        result.push_back(hex[c % 16]);
+    }
+
+    return result;
+}
+
 void RPCConsole::setClientModel(ClientModel *model, int bestblock_height, int64_t bestblock_date, double verification_progress)
 {
     clientModel = model;
@@ -746,6 +762,11 @@ void RPCConsole::setClientModel(ClientModel *model, int bestblock_height, int64_
         ui->blocksDir->setText(model->blocksDir());
         ui->startupTime->setText(model->formatClientStartupTime());
         ui->networkName->setText(QString::fromStdString(Params().NetworkIDString()));
+        if(Params().NetworkIDString() ==  "signet")
+        {
+            std::vector<uint8_t> zzz= Params().GetConsensus().signet_challenge;
+            ui->networkName->setToolTip(QString::fromStdString("Challenge: " +uint8_vector_to_hex_string(zzz)));
+        }
 
         //Setup autocomplete and attach it
         QStringList wordList;
