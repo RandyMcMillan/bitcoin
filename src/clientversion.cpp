@@ -61,14 +61,14 @@ std::string FormatSubVersion(const std::string& name, int nClientVersion, const 
     std::ostringstream ss;
     ss << "/";
     ss << name << ":" << FormatVersion(nClientVersion);
+    ss << "/";
     if (!comments.empty())
     {
         std::vector<std::string>::const_iterator it(comments.begin());
         ss << "(" << *it;
         for(++it; it != comments.end(); ++it)
             ss << "; " << *it;
-        ss << ")";
+        ss << ")/";
     }
-    ss << "/";
     return ss.str();
 }
