@@ -19,7 +19,7 @@ Our current macOS SDK
 extracted from
 [Xcode_12.2.xip](https://download.developer.apple.com/Developer_Tools/Xcode_12.2/Xcode_12.2.xip).
 Alternatively, after logging in to your account go to 'Downloads', then 'More'
-and look for [`Xcode_12.2`](https://download.developer.apple.com/Developer_Tools/Xcode_12.2/Xcode_12.2.xip).
+and search for [`Xcode 12.2`](https://developer.apple.com/download/all/?q=Xcode%2012.2).
 An Apple ID and cookies enabled for the hostname are needed to download this.
 The `sha256sum` of the archive should be `28d352f8c14a43d9b8a082ac6338dc173cb153f964c6e8fb6ba389e5be528bd0`.
 
