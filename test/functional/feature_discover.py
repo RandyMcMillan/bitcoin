@@ -16,6 +16,7 @@ def assertAddressStringTests():
     assert(inet_pton(AF_INET, "255.255.255.255"))
     assert(inet_pton(AF_INET6, '::FFFF:192.1.1.1'))
     assert(inet_pton(AF_INET6, "::FFFF:192.1.1.1"))
+    assert(inet_pton(AF_INET6,"1233:3432:2434:2343:3234:2345:6546:4534"))
 
 def testAddressDict(self,local_addrs):
     if (socket.AF_UNIX):
@@ -23,8 +24,12 @@ def testAddressDict(self,local_addrs):
             score, score_int = address.popitem()
             port, port_int = address.popitem()
             address, address_string = address.popitem()
-            self.log.info("Test if the IPv4/6 addresses are valid %s",address_string)
-            socket.inet_pton(socket.AF_INET6, address_string)
+            try:
+                self.log.info("1:Test if the IPv4/6 addresses are valid %s",address_string)
+                socket.inet_pton(socket.AF_INET6, address_string)
+            except OSError:
+                print('cannot test:', address_string)
+
 
 class DiscoverTest(BitcoinTestFramework):
     """Test -discover command."""
@@ -37,6 +42,20 @@ class DiscoverTest(BitcoinTestFramework):
         self.log.info("Test node (-discover=0) has 0 local addresses")
         assert_equal(self.nodes[0].getnetworkinfo()["localaddresses"], [])
         assertAddressStringTests()
+
+        # ipv4_addr = "255.255.255.255"
+        # self.nodes[0].addpeeraddress(address=ipv4_addr, port=8333)
+        # res2 = self.nodes[0].getnodeaddresses(0, "ipv4")
+        # self.log.info(self.nodes[0].getnodeaddresses(0,"ipv4"))
+        # assert_equal(res2[0]["address"], ipv4_addr)
+        # assert_equal(res2[0]["network"], "ipv4")
+
+        ipv6_addr = "1233:3432:2434:2343:3234:2345:6546:4534"
+        self.nodes[0].addpeeraddress(address=ipv6_addr, port=8333)
+        res = self.nodes[0].getnodeaddresses(0, "ipv6")
+        self.log.info(self.nodes[0].getnodeaddresses(0,"ipv6"))
+        assert_equal(res[0]["address"], ipv6_addr)
+        assert_equal(res[0]["network"], "ipv6")
 
         # default cases
         self.log.info("Restart node with -listen -discover")
