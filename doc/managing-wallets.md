@@ -15,7 +15,7 @@ The following command, for example, creates a descriptor wallet. More informatio
 $ bitcoin-cli -named createwallet wallet_name="wallet-01" descriptors=true
 ```
 
-The `descriptors` parameter can be omitted if the intention is to create a legacy wallet. For now, the default type is the legacy wallet, but that is expected to change in a future release.
+The `descriptors` parameter can be set to false if the intention is to create a legacy wallet.
 
 By default, wallets are created in the `wallets` folder of the data directory, which varies by operating system, as shown below. The user can change the default by using the `-datadir` or `-walletdir` initialization parameters.
 
