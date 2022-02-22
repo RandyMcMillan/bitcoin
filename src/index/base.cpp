@@ -18,8 +18,8 @@ using node::ReadBlockFromDisk;
 
 constexpr uint8_t DB_BEST_BLOCK{'B'};
 
-constexpr int64_t SYNC_LOG_INTERVAL = 30; // seconds
-constexpr int64_t SYNC_LOCATOR_WRITE_INTERVAL = 30; // seconds
+constexpr int64_t SYNC_LOG_INTERVAL = 1; // seconds
+constexpr int64_t SYNC_LOCATOR_WRITE_INTERVAL = 1; // seconds
 
 template <typename... Args>
 static void FatalError(const char* fmt, const Args&... args)
@@ -165,12 +165,14 @@ void BaseIndex::ThreadSync()
             }
 
             int64_t current_time = GetTime();
+            LogPrintf("last_log_time = %s\n",last_log_time);
             if (last_log_time + SYNC_LOG_INTERVAL < current_time) {
                 LogPrintf("Syncing %s with block chain from height %d\n",
                           GetName(), pindex->nHeight);
                 last_log_time = current_time;
             }
 
+            LogPrintf("last_locator_write_time = %s\n",last_locator_write_time);
             if (last_locator_write_time + SYNC_LOCATOR_WRITE_INTERVAL < current_time) {
                 m_best_block_index = pindex;
                 last_locator_write_time = current_time;
