@@ -750,7 +750,7 @@ QString formatPingTime(std::chrono::microseconds ping_time)
 
 QString formatTimeOffset(int64_t nTimeOffset)
 {
-  return QObject::tr("%1 s").arg(QString::number((int)nTimeOffset, 10));
+  return QObject::tr("%1 s").arg(QString::number(nTimeOffset, 10));
 }
 
 QString formatNiceTimeOffset(qint64 secs)
