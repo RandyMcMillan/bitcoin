@@ -27,7 +27,7 @@ def main():
     check_codespell_install()
 
     files = check_output(FILES_ARGS).decode("utf-8").splitlines()
-    codespell_args = ['codespell', '--check-filenames', '--disable-colors', '--quiet-level=7', '--ignore-words={}'.format(IGNORE_WORDS_FILE)] + files
+    codespell_args = ['codespell', '--check-filenames', '--disable-colors', '--quiet-level=7', '--ignore-regex=\'(nd:\'', '--ignore-words={}'.format(IGNORE_WORDS_FILE)] + files
 
     try:
         check_output(codespell_args, stderr=STDOUT)
