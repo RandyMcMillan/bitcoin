@@ -24,8 +24,10 @@
 
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <numeric>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -325,4 +327,34 @@ FUZZ_TARGET_INIT(ellswift_roundtrip, initialize_key)
     auto decoded_pubkey = encoded_ellswift.Decode();
 
     assert(key.VerifyPubKey(decoded_pubkey));
+}
+
+FUZZ_TARGET_INIT(bip324_ecdh, initialize_key)
+{
+    FuzzedDataProvider fdp{buffer.data(), buffer.size()};
+
+    auto rnd32 = fdp.ConsumeBytes<uint8_t>(32);
+    rnd32.resize(32);
+    CKey k1;
+    k1.Set(rnd32.begin(), rnd32.end(), true);
+    if (!k1.IsValid()) return;
+
+    rnd32 = fdp.ConsumeBytes<uint8_t>(32);
+    rnd32.resize(32);
+    CKey k2;
+    k2.Set(rnd32.begin(), rnd32.end(), true);
+    if (!k2.IsValid()) return;
+
+    auto ent32 = fdp.ConsumeBytes<std::byte>(32);
+    ent32.resize(32);
+    auto k1_ellswift = k1.EllSwiftCreate(ent32);
+
+    ent32 = fdp.ConsumeBytes<std::byte>(32);
+    ent32.resize(32);
+    auto k2_ellswift = k2.EllSwiftCreate(ent32);
+
+    bool initiating = fdp.ConsumeBool();
+    auto ecdh_secret_1 = k1.ComputeBIP324ECDHSecret(k2_ellswift, k1_ellswift, initiating);
+    auto ecdh_secret_2 = k2.ComputeBIP324ECDHSecret(k1_ellswift, k2_ellswift, !initiating);
+    assert(ecdh_secret_1 == ecdh_secret_2);
 }
