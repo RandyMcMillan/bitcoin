@@ -16,13 +16,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys, re, os, platform, shutil, stat, subprocess, os.path
-from argparse import ArgumentParser
-from ds_store import DSStore
-from mac_alias import Alias
-from pathlib import Path
-from subprocess import PIPE, run
-from typing import List, Optional
+import sys, re, os, platform, shutil, stat, subprocess, os.path, pip
+while True:
+	try:
+		from argparse import ArgumentParser
+		from ds_store import DSStore
+		from mac_alias import Alias
+		from pathlib import Path
+		from subprocess import PIPE, run
+		from typing import List, Optional
+		break
+	except ImportError as err_mdl:
+		print((err_mdl.name))
+		pip.main(['install', err_mdl.name])
 
 # This is ported from the original macdeployqt with modifications
 
