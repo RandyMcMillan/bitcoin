@@ -114,6 +114,8 @@ options. Run `test/functional/test_runner.py -h` to see them all.
 If you have available RAM on your system you can create a ramdisk to use as the `cache` and `tmp` directories for the functional tests in order to speed them up.
 Speed-up amount varies on each system (and according to your ram speed and other variables), but a 2-3x speed-up is not uncommon.
 
+**Linux**
+
 To create a 4GB ramdisk on Linux at `/mnt/tmp/`:
 
 ```bash
@@ -135,6 +137,27 @@ Once finished with the tests and the disk, and to free the ram, simply unmount t
 
 ```bash
 sudo umount /mnt/tmp
+```
+
+**OSX**
+
+To create a 4GB ramdisk named "ramdisk" on OSX at `/Volumes/ramdisk/`:
+
+```bash
+diskutil erasevolume HFS+ ramdisk $(hdiutil attach -nomount ram://8388608)
+```
+
+Configure the size at the end of the command, in terms of block size
+(`8388608 / 2048 = 4096` or 4 GB). To run the tests using the ramdisk:
+
+```bash
+test/functional/test_runner.py --cachedir=/Volumes/ramdisk/cache --tmpdir=/Volumes/ramdisk/tmp
+```
+
+To unmount:
+
+```bash
+umount /Volumes/ramdisk
 ```
 
 #### Troubleshooting and debugging test failures
