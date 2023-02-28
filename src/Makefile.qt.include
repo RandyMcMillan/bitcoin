@@ -59,6 +59,7 @@ QT_MOC_CPP = \
   qt/moc_macnotificationhandler.cpp \
   qt/mempool_tab/moc_mempoolstats.cpp \
   qt/mempool_tab/moc_mempooldetail.cpp \
+  qt/moc_mempoolstats.cpp \
   qt/moc_modaloverlay.cpp \
   qt/moc_notificator.cpp \
   qt/moc_openuridialog.cpp \
@@ -134,6 +135,7 @@ BITCOIN_QT_H = \
   qt/macos_appnap.h \
   qt/mempool_tab/mempoolstats.h \
   qt/mempool_tab/mempooldetail.h \
+  qt/mempoolstats.h \
   qt/modaloverlay.h \
   qt/networkstyle.h \
   qt/notificator.h \
@@ -239,6 +241,7 @@ BITCOIN_QT_BASE_CPP = \
   qt/intro.cpp \
   qt/mempool_tab/mempoolstats.cpp \
   qt/mempool_tab/mempooldetail.cpp \
+  qt/mempoolstats.cpp \
   qt/modaloverlay.cpp \
   qt/networkstyle.cpp \
   qt/notificator.cpp \
