@@ -1184,7 +1184,22 @@ std::unique_ptr<WalletDatabase> MakeDatabase(const fs::path& path, const Databas
     }
 
     if (!format && options.require_existing) {
-        error = Untranslated(strprintf("Failed to load database path '%s'. Data is not in recognized format.", fs::PathToString(path)));
+        if(Params().NetworkIDString() ==  "test")
+        {
+            error = Untranslated(strprintf("detecting testnet..."));
+        }
+        if(Params().NetworkIDString() ==  "regtest")
+        {
+            error = Untranslated(strprintf("detecting regnet..."));
+        }
+        if(Params().NetworkIDString() ==  "signet")
+        {
+            error = Untranslated(strprintf("detecting signet..."));
+        }
+        if(Params().NetworkIDString() ==  "main")
+        {
+            error = Untranslated(strprintf("Failed to load database path '%s'. Data is not in recognized format.", fs::PathToString(path)));
+        }
         status = DatabaseStatus::FAILED_BAD_FORMAT;
         return nullptr;
     }
