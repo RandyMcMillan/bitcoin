@@ -11,6 +11,7 @@
 #include <random.h>
 
 #include <secp256k1.h>
+#include <secp256k1_ellswift.h>
 #include <secp256k1_extrakeys.h>
 #include <secp256k1_recovery.h>
 #include <secp256k1_schnorrsig.h>
@@ -329,6 +330,57 @@ bool CKey::Derive(CKey& keyChild, ChainCode &ccChild, unsigned int nChild, const
     keyChild.fCompressed = true;
     keyChild.fValid = ret;
     return ret;
+}
+
+EllSwiftPubKey CKey::EllSwiftCreate(Span<const std::byte> ent32) const
+{
+    assert(fValid);
+    assert(ent32.size() == 32);
+    std::array<std::byte, EllSwiftPubKey::size()> encoded_pubkey;
+
+    auto success = secp256k1_ellswift_create(secp256k1_context_sign,
+                                             UCharCast(encoded_pubkey.data()),
+                                             keydata.data(),
+                                             UCharCast(ent32.data()));
+
+    // Should always succeed for valid keys (asserted above).
+    assert(success);
+    return {encoded_pubkey};
+}
+
+static const HashWriter HASHER_BIP324_ECDH = TaggedHash("bip324_ellswift_xonly_ecdh");
+
+extern "C" {
+
+static int BIP324ECDHHash(unsigned char* output, const unsigned char* x32, const unsigned char* ours, const unsigned char* theirs, void* data)
+{
+    bool initiating = *(bool*)data;
+    HashWriter writer{HASHER_BIP324_ECDH};
+    writer << Span{initiating ? ours : theirs, EllSwiftPubKey::size()};
+    writer << Span{initiating ? theirs : ours, EllSwiftPubKey::size()};
+    writer << Span{x32, 32};
+    uint256 result = writer.GetSHA256();
+    std::copy(result.begin(), result.end(), output);
+    return 1;
+}
+
+} // extern "C"
+
+ECDHSecret CKey::ComputeBIP324ECDHSecret(const EllSwiftPubKey& their_ellswift, const EllSwiftPubKey& our_ellswift, bool initiating) const
+{
+    assert(fValid);
+
+    ECDHSecret output;
+    bool success = secp256k1_ellswift_xdh(secp256k1_context_sign,
+                                          UCharCast(output.data()),
+                                          UCharCast(their_ellswift.data()),
+                                          UCharCast(our_ellswift.data()),
+                                          keydata.data(),
+                                          &BIP324ECDHHash,
+                                          (void*)&initiating); // BIP324ECDHHash expects &initiating as data
+    // Should always succeed for valid keys (assert above).
+    assert(success);
+    return output;
 }
 
 bool CExtKey::Derive(CExtKey &out, unsigned int _nChild) const {
