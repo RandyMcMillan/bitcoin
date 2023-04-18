@@ -299,6 +299,9 @@ private:
     std::array<std::byte, SIZE> m_pubkey;
 
 public:
+    /** Construct an all 0x00 public key. Note that that is a valid pubkey. */
+    EllSwiftPubKey() = default;
+
     /** Construct a new ellswift public key from a given serialization. */
     EllSwiftPubKey(const std::array<std::byte, SIZE>& ellswift) :
         m_pubkey(ellswift) {}
