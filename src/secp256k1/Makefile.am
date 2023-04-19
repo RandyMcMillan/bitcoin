@@ -248,6 +248,10 @@ if ENABLE_MODULE_SCHNORRSIG
 include src/modules/schnorrsig/Makefile.am.include
 endif
 
+if ENABLE_MODULE_ELLSWIFT
+include src/modules/ellswift/Makefile.am.include
+endif
+
 EXTRA_DIST += src/wycheproof/WYCHEPROOF_COPYING
 EXTRA_DIST += src/wycheproof/ecdsa_secp256k1_sha256_bitcoin_test.h
 EXTRA_DIST += src/wycheproof/ecdsa_secp256k1_sha256_bitcoin_test.json
