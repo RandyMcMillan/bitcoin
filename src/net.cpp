@@ -1717,31 +1717,31 @@ void CConnman::ThreadOpenConnections(const std::vector<std::string> connect)
 
                 // Make sure our persistent outbound slots to ipv4/ipv6 peers belong to different netgroups.
                 switch (pnode->m_conn_type) {
-                    // We currently don't take inbound connections into account. Since they are
-                    // free to make, an attacker could make them to prevent us from connecting to
-                    // certain peers.
-                    case ConnectionType::INBOUND:
-                    // Short-lived outbound connections should not affect how we select outbound
-                    // peers from addrman.
-                    case ConnectionType::ADDR_FETCH:
-                    case ConnectionType::FEELER:
-                        break;
-                    case ConnectionType::MANUAL:
-                    case ConnectionType::OUTBOUND_FULL_RELAY:
-                    case ConnectionType::BLOCK_RELAY:
-                        const CAddress address{pnode->addr};
-                        if (address.IsTor() || address.IsI2P() || address.IsCJDNS()) {
-                            // Since our addrman-groups for these networks are
-                            // random, without relation to the route we
-                            // take to connect to these peers or to the
-                            // difficulty in obtaining addresses with diverse
-                            // groups, we don't worry about diversity with
-                            // respect to our addrman groups when connecting to
-                            // these networks.
-                            ++outbound_privacy_network_peers;
-                        } else {
-                            outbound_ipv46_peer_netgroups.insert(m_netgroupman.GetGroup(address));
-                        }
+                // We currently don't take inbound connections into account. Since they are
+                // free to make, an attacker could make them to prevent us from connecting to
+                // certain peers.
+                case ConnectionType::INBOUND:
+                // Short-lived outbound connections should not affect how we select outbound
+                // peers from addrman.
+                case ConnectionType::ADDR_FETCH:
+                case ConnectionType::FEELER:
+                    break;
+                case ConnectionType::MANUAL:
+                case ConnectionType::OUTBOUND_FULL_RELAY:
+                case ConnectionType::BLOCK_RELAY:
+                    const CAddress address{pnode->addr};
+                    if (address.IsTor() || address.IsI2P() || address.IsCJDNS()) {
+                        // Since our addrman-groups for these networks are
+                        // random, without relation to the route we
+                        // take to connect to these peers or to the
+                        // difficulty in obtaining addresses with diverse
+                        // groups, we don't worry about diversity with
+                        // respect to our addrman groups when connecting to
+                        // these networks.
+                        ++outbound_privacy_network_peers;
+                    } else {
+                        outbound_ipv46_peer_netgroups.insert(m_netgroupman.GetGroup(address));
+                    }
                 } // no default case, so the compiler can warn about missing cases
             }
         }
