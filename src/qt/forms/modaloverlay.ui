@@ -214,6 +214,9 @@ QLabel { color: rgb(40,40,40);  }</string>
              <property name="text">
               <string>Number of blocks left</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
            </item>
            <item row="0" column="1">
@@ -233,6 +236,9 @@ QLabel { color: rgb(40,40,40);  }</string>
              </property>
              <property name="text">
               <string>Last block time</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -284,6 +290,9 @@ QLabel { color: rgb(40,40,40);  }</string>
              <property name="text">
               <string>Progress increase per hour</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
            </item>
            <item row="4" column="1">
@@ -303,6 +312,9 @@ QLabel { color: rgb(40,40,40);  }</string>
              </property>
              <property name="text">
               <string>Estimated time left until synced</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
