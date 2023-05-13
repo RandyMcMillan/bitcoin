@@ -18,4 +18,4 @@ array=$(git grep -l "Syncing Headers (%1, %2%)" src/*) && doit
 array=$(git grep -l "Syncing Headers (%1%)" src/*) && doit
 array=$(git grep -l "Syncing with network…" src/*) && doit
 array=$(git grep -l "Unknown…" src/*) && doit
-array=$(git grep -l "Unknown " src/*) && doit
+array=$(git grep -l "Unknown " src/qt) && doit
