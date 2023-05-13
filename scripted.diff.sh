@@ -21,13 +21,19 @@ do
 	$SED  -i -e 's/Syncing with network…/Syncing with notwork/' $i
 done
 }
+#src/qt/forms/receiverequestdialog.ui
 array=$(git grep -l "Unknown…" src/qt/modal*.cpp) && doit
-array=$(git grep -l "…" src/qt/modal*.cpp) && doit
-array=$(git grep -l "…" src/qt/*) && doit
+#array=$(git grep -l "…" src/qt/modal*.cpp) && doit
+#array=$(git grep -l "…" src/qt/*) && doit
 array=$(git grep -l "Syncing Headers (%1, %2%)" src/qt/*) && doit
 array=$(git grep -l "Syncing Headers (%1%)" src/qt/*) && doit
 array=$(git grep -l "Syncing with network…" src/qt/*) && doit
 
+git checkout src/qt/forms/intro.ui
+git checkout src/qt/bitcoin.cpp
 git checkout src/qt/bitcoingui.cpp
 git checkout src/qt/bitcoinstrings.cpp
-make && open Bitcoin-Qt.app
+
+git diff
+make
+#open Bitcoin-Qt.app
