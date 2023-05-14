@@ -27,17 +27,21 @@ done
 #array=$(git grep -l "…" src/qt/modal*.cpp) && doit
 #array=$(git grep -l "…" src/qt/*) && doit
 
-strings=("Unknown…" "Syncing Headers (%1, %2%)…" "Syncing Headers (%1%)…" "Syncing with network…" "&amp;Options…")
+strings=("…" "Unknown…" "Syncing Headers (%1, %2%)…" "Syncing Headers (%1%)…" "Syncing with network…" "&amp;Options…")
 
-for j in "${string[@]}"
+for j in "${strings[@]}"
 do
-array=$(git grep -l $j src/qt/modal*.cpp) && doit
+	echo "$j"
+	array=$(git grep -l $j src/qt/*) && doit
+	array=$(git grep -l $j src/qt/forms/*) && doit
+	array=$(git grep -l $j src/qt/locale/*) && doit
+	array=$(git grep -l $j src/qt/modal*.cpp) && doit
 done
 
-git checkout src/qt/forms/intro.ui
-git checkout src/qt/bitcoin.cpp
-git checkout src/qt/bitcoingui.cpp
-git checkout src/qt/bitcoinstrings.cpp
+#git checkout src/qt/forms/intro.ui
+#git checkout src/qt/bitcoin.cpp
+#git checkout src/qt/bitcoingui.cpp
+#git checkout src/qt/bitcoinstrings.cpp
 
 git diff
 make deploy
