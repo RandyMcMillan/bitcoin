@@ -1194,6 +1194,14 @@ std::unique_ptr<WalletDatabase> MakeDatabase(const fs::path& path, const Databas
         }
         if(Params().NetworkIDString() ==  CBaseChainParams::SIGNET)
         {
+            //Params().GetConsensus().signet_challenge;
+            LogPrintf("Signet with challenge %s\n", Params().GetConsensus().signet_challenge[0]);
+            if (Params().GetConsensus().signet_challenge[0] != 0)
+            {
+
+            error = Untranslated(strprintf("detecting signet...SigNetParams.bin??"));
+
+            }
             error = Untranslated(strprintf("detecting signet..."));
         }
         if(Params().NetworkIDString() ==  CBaseChainParams::MAIN)

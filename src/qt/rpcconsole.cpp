@@ -762,11 +762,17 @@ void RPCConsole::setClientModel(ClientModel *model, int bestblock_height, int64_
         ui->blocksDir->setText(model->blocksDir());
         ui->startupTime->setText(model->formatClientStartupTime());
         ui->networkName->setText(QString::fromStdString(Params().NetworkIDString()));
-        if(Params().NetworkIDString() ==  CBaseChainParams::SIGNET)
+        if(Params().NetworkIDString() == CBaseChainParams::SIGNET)
         {
-            std::vector<uint8_t> zzz= Params().GetConsensus().signet_challenge;
-            ui->networkName->setToolTip(QString::fromStdString("Challenge: " +uint8_vector_to_hex_string(zzz)));
+            ui->networkName->setToolTip(
+                    QString::fromStdString(
+                        uint8_vector_to_hex_string(
+                            Params().GetConsensus().signet_challenge
+                            )
+                        )
+                    );
         }
+
 
         //Setup autocomplete and attach it
         QStringList wordList;
