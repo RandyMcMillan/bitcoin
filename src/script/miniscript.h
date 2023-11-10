@@ -7,8 +7,8 @@
 
 #include <algorithm>
 #include <functional>
-#include <numeric>
 #include <memory>
+#include <numeric>
 #include <optional>
 #include <string>
 #include <vector>
@@ -117,8 +117,9 @@ namespace miniscript {
  *     the user expectation of the corresponding spending policy.
  * For each of these properties the subset rule holds: an expression with properties X, Y, and Z, is also
  * valid in places where an X, a Y, a Z, an XY, ... is expected.
-*/
-class Type {
+ */
+class Type
+{
     //! Internal bitmap of properties (see ""_mst operator for details).
     uint32_t m_flags;
 
@@ -149,32 +150,50 @@ public:
 };
 
 //! Literal operator to construct Type objects.
-inline constexpr Type operator"" _mst(const char* c, size_t l) {
+inline constexpr Type operator"" _mst(const char* c, size_t l)
+{
     Type typ{0};
 
-    for (const char *p = c; p < c + l; p++) {
+    for (const char* p = c; p < c + l; p++) {
         typ = typ | Type(
-            *p == 'B' ? 1 << 0 : // Base type
-            *p == 'V' ? 1 << 1 : // Verify type
-            *p == 'K' ? 1 << 2 : // Key type
-            *p == 'W' ? 1 << 3 : // Wrapped type
-            *p == 'z' ? 1 << 4 : // Zero-arg property
-            *p == 'o' ? 1 << 5 : // One-arg property
-            *p == 'n' ? 1 << 6 : // Nonzero arg property
-            *p == 'd' ? 1 << 7 : // Dissatisfiable property
-            *p == 'u' ? 1 << 8 : // Unit property
-            *p == 'e' ? 1 << 9 : // Expression property
-            *p == 'f' ? 1 << 10 : // Forced property
-            *p == 's' ? 1 << 11 : // Safe property
-            *p == 'm' ? 1 << 12 : // Nonmalleable property
-            *p == 'x' ? 1 << 13 : // Expensive verify
-            *p == 'g' ? 1 << 14 : // older: contains relative time timelock   (csv_time)
-            *p == 'h' ? 1 << 15 : // older: contains relative height timelock (csv_height)
-            *p == 'i' ? 1 << 16 : // after: contains time timelock   (cltv_time)
-            *p == 'j' ? 1 << 17 : // after: contains height timelock   (cltv_height)
-            *p == 'k' ? 1 << 18 : // does not contain a combination of height and time locks
-            (throw std::logic_error("Unknown character in _mst literal"), 0)
-        );
+                        *p == 'B' ? 1 << 0 : // Base type
+                            *p == 'V' ? 1 << 1 :
+                                        // Verify type
+                            *p == 'K' ? 1 << 2 :
+                                        // Key type
+                            *p == 'W' ? 1 << 3 :
+                                        // Wrapped type
+                            *p == 'z' ? 1 << 4 :
+                                        // Zero-arg property
+                            *p == 'o' ? 1 << 5 :
+                                        // One-arg property
+                            *p == 'n' ? 1 << 6 :
+                                        // Nonzero arg property
+                            *p == 'd' ? 1 << 7 :
+                                        // Dissatisfiable property
+                            *p == 'u' ? 1 << 8 :
+                                        // Unit property
+                            *p == 'e' ? 1 << 9 :
+                                        // Expression property
+                            *p == 'f' ? 1 << 10 :
+                                        // Forced property
+                            *p == 's' ? 1 << 11 :
+                                        // Safe property
+                            *p == 'm' ? 1 << 12 :
+                                        // Nonmalleable property
+                            *p == 'x' ? 1 << 13 :
+                                        // Expensive verify
+                            *p == 'g' ? 1 << 14 :
+                                        // older: contains relative time timelock   (csv_time)
+                            *p == 'h' ? 1 << 15 :
+                                        // older: contains relative height timelock (csv_height)
+                            *p == 'i' ? 1 << 16 :
+                                        // after: contains time timelock   (cltv_time)
+                            *p == 'j' ? 1 << 17 :
+                                        // after: contains height timelock   (cltv_height)
+                            *p == 'k' ? 1 << 18 :
+                                        // does not contain a combination of height and time locks
+                                        (throw std::logic_error("Unknown character in _mst literal"), 0));
     }
 
     return typ;
@@ -182,12 +201,17 @@ inline constexpr Type operator"" _mst(const char* c, size_t l) {
 
 using Opcode = std::pair<opcodetype, std::vector<unsigned char>>;
 
-template<typename Key> struct Node;
-template<typename Key> using NodeRef = std::shared_ptr<const Node<Key>>;
+template <typename Key>
+struct Node;
+template <typename Key>
+using NodeRef = std::shared_ptr<const Node<Key>>;
 
 //! Construct a miniscript node as a shared_ptr.
-template<typename Key, typename... Args>
-NodeRef<Key> MakeNodeRef(Args&&... args) { return std::make_shared<const Node<Key>>(std::forward<Args>(args)...); }
+template <typename Key, typename... Args>
+NodeRef<Key> MakeNodeRef(Args&&... args)
+{
+    return std::make_shared<const Node<Key>>(std::forward<Args>(args)...);
+}
 
 //! The different node types in miniscript.
 enum class Fragment {
@@ -292,12 +316,14 @@ static const auto INVALID = InputStack().SetAvailable(Availability::NO);
 struct InputResult {
     InputStack nsat, sat;
 
-    template<typename A, typename B>
-    InputResult(A&& in_nsat, B&& in_sat) : nsat(std::forward<A>(in_nsat)), sat(std::forward<B>(in_sat)) {}
+    template <typename A, typename B>
+    InputResult(A&& in_nsat, B&& in_sat) : nsat(std::forward<A>(in_nsat)), sat(std::forward<B>(in_sat))
+    {
+    }
 };
 
 //! Class whose objects represent the maximum of a list of integers.
-template<typename I>
+template <typename I>
 struct MaxInt {
     const bool valid;
     const I value;
@@ -305,12 +331,14 @@ struct MaxInt {
     MaxInt() : valid(false), value(0) {}
     MaxInt(I val) : valid(true), value(val) {}
 
-    friend MaxInt<I> operator+(const MaxInt<I>& a, const MaxInt<I>& b) {
+    friend MaxInt<I> operator+(const MaxInt<I>& a, const MaxInt<I>& b)
+    {
         if (!a.valid || !b.valid) return {};
         return a.value + b.value;
     }
 
-    friend MaxInt<I> operator|(const MaxInt<I>& a, const MaxInt<I>& b) {
+    friend MaxInt<I> operator|(const MaxInt<I>& a, const MaxInt<I>& b)
+    {
         if (!a.valid) return b;
         if (!b.valid) return a;
         return std::max(a.value, b.value);
@@ -325,7 +353,7 @@ struct Ops {
     //! Number of keys in possibly executed OP_CHECKMULTISIG(VERIFY)s to dissatisfy.
     MaxInt<uint32_t> dsat;
 
-    Ops(uint32_t in_count, MaxInt<uint32_t> in_sat, MaxInt<uint32_t> in_dsat) : count(in_count), sat(in_sat), dsat(in_dsat) {};
+    Ops(uint32_t in_count, MaxInt<uint32_t> in_sat, MaxInt<uint32_t> in_dsat) : count(in_count), sat(in_sat), dsat(in_dsat){};
 };
 
 struct StackSize {
@@ -334,15 +362,16 @@ struct StackSize {
     //! Maximum stack size to dissatisfy;
     MaxInt<uint32_t> dsat;
 
-    StackSize(MaxInt<uint32_t> in_sat, MaxInt<uint32_t> in_dsat) : sat(in_sat), dsat(in_dsat) {};
+    StackSize(MaxInt<uint32_t> in_sat, MaxInt<uint32_t> in_dsat) : sat(in_sat), dsat(in_dsat){};
 };
 
-struct NoDupCheck {};
+struct NoDupCheck {
+};
 
 } // namespace internal
 
 //! A node in a miniscript expression.
-template<typename Key>
+template <typename Key>
 struct Node {
     //! What node type this node is.
     const Fragment fragment;
@@ -373,7 +402,8 @@ private:
 
 
     //! Compute the length of the script for this miniscript (including children).
-    size_t CalcScriptLen() const {
+    size_t CalcScriptLen() const
+    {
         size_t subsize = 0;
         for (const auto& sub : subs) {
             subsize += sub->ScriptSize();
@@ -405,18 +435,16 @@ private:
      *
      * Result type cannot be bool due to the std::vector<bool> specialization.
      */
-    template<typename Result, typename State, typename DownFn, typename UpFn>
+    template <typename Result, typename State, typename DownFn, typename UpFn>
     std::optional<Result> TreeEvalMaybe(State root_state, DownFn downfn, UpFn upfn) const
     {
         /** Entries of the explicit stack tracked in this algorithm. */
-        struct StackElem
-        {
+        struct StackElem {
             const Node& node; //!< The node being evaluated.
-            size_t expanded; //!< How many children of this node have been expanded.
-            State state; //!< The state for that node.
+            size_t expanded;  //!< How many children of this node have been expanded.
+            State state;      //!< The state for that node.
 
-            StackElem(const Node& node_, size_t exp_, State&& state_) :
-                node(node_), expanded(exp_), state(std::move(state_)) {}
+            StackElem(const Node& node_, size_t exp_, State&& state_) : node(node_), expanded(exp_), state(std::move(state_)) {}
         };
         /* Stack of tree nodes being explored. */
         std::vector<StackElem> stack;
@@ -455,7 +483,7 @@ private:
             // Invoke upfn with the last node.subs.size() elements of results as input.
             assert(results.size() >= node.subs.size());
             std::optional<Result> result{upfn(std::move(stack.back().state), node,
-                Span<Result>{results}.last(node.subs.size()))};
+                                              Span<Result>{results}.last(node.subs.size()))};
             // If evaluation returns std::nullopt, abort immediately.
             if (!result) return {};
             // Replace the last node.subs.size() elements of results with the new result.
@@ -470,46 +498,47 @@ private:
 
     /** Like TreeEvalMaybe, but without downfn or State type.
      * upfn takes (const Node&, Span<Result>) and returns std::optional<Result>. */
-    template<typename Result, typename UpFn>
+    template <typename Result, typename UpFn>
     std::optional<Result> TreeEvalMaybe(UpFn upfn) const
     {
-        struct DummyState {};
-        return TreeEvalMaybe<Result>(DummyState{},
+        struct DummyState {
+        };
+        return TreeEvalMaybe<Result>(
+            DummyState{},
             [](DummyState, const Node&, size_t) { return DummyState{}; },
             [&upfn](DummyState, const Node& node, Span<Result> subs) {
                 return upfn(node, subs);
-            }
-        );
+            });
     }
 
     /** Like TreeEvalMaybe, but always produces a result. upfn must return Result. */
-    template<typename Result, typename State, typename DownFn, typename UpFn>
+    template <typename Result, typename State, typename DownFn, typename UpFn>
     Result TreeEval(State root_state, DownFn&& downfn, UpFn upfn) const
     {
         // Invoke TreeEvalMaybe with upfn wrapped to return std::optional<Result>, and then
         // unconditionally dereference the result (it cannot be std::nullopt).
         return std::move(*TreeEvalMaybe<Result>(std::move(root_state),
-            std::forward<DownFn>(downfn),
-            [&upfn](State&& state, const Node& node, Span<Result> subs) {
-                Result res{upfn(std::move(state), node, subs)};
-                return std::optional<Result>(std::move(res));
-            }
-        ));
+                                                std::forward<DownFn>(downfn),
+                                                [&upfn](State&& state, const Node& node, Span<Result> subs) {
+                                                    Result res{upfn(std::move(state), node, subs)};
+                                                    return std::optional<Result>(std::move(res));
+                                                }));
     }
 
     /** Like TreeEval, but without downfn or State type.
      *  upfn takes (const Node&, Span<Result>) and returns Result. */
-    template<typename Result, typename UpFn>
+    template <typename Result, typename UpFn>
     Result TreeEval(UpFn upfn) const
     {
-        struct DummyState {};
-        return std::move(*TreeEvalMaybe<Result>(DummyState{},
+        struct DummyState {
+        };
+        return std::move(*TreeEvalMaybe<Result>(
+            DummyState{},
             [](DummyState, const Node&, size_t) { return DummyState{}; },
             [&upfn](DummyState, const Node& node, Span<Result> subs) {
                 Result res{upfn(node, subs)};
                 return std::optional<Result>(std::move(res));
-            }
-        ));
+            }));
     }
 
     /** Compare two miniscript subtrees, using a non-recursive algorithm. */
@@ -533,13 +562,15 @@ private:
     }
 
     //! Compute the type for this miniscript.
-    Type CalcType() const {
+    Type CalcType() const
+    {
         using namespace internal;
 
         // THRESH has a variable number of subexpressions
         std::vector<Type> sub_types;
         if (fragment == Fragment::THRESH) {
-            for (const auto& sub : subs) sub_types.push_back(sub->GetType());
+            for (const auto& sub : subs)
+                sub_types.push_back(sub->GetType());
         }
         // All other nodes than THRESH can be computed just from the types of the 0-3 subexpressions.
         Type x = subs.size() > 0 ? subs[0]->GetType() : ""_mst;
@@ -550,7 +581,7 @@ private:
     }
 
 public:
-    template<typename Ctx>
+    template <typename Ctx>
     CScript ToScript(const Ctx& ctx) const
     {
         // To construct the CScript for a Miniscript object, we use the TreeEval algorithm.
@@ -569,58 +600,59 @@ public:
         // and the CScripts of its child nodes, the CScript of the node.
         auto upfn = [&ctx](bool verify, const Node& node, Span<CScript> subs) -> CScript {
             switch (node.fragment) {
-                case Fragment::PK_K: return BuildScript(ctx.ToPKBytes(node.keys[0]));
-                case Fragment::PK_H: return BuildScript(OP_DUP, OP_HASH160, ctx.ToPKHBytes(node.keys[0]), OP_EQUALVERIFY);
-                case Fragment::OLDER: return BuildScript(node.k, OP_CHECKSEQUENCEVERIFY);
-                case Fragment::AFTER: return BuildScript(node.k, OP_CHECKLOCKTIMEVERIFY);
-                case Fragment::SHA256: return BuildScript(OP_SIZE, 32, OP_EQUALVERIFY, OP_SHA256, node.data, verify ? OP_EQUALVERIFY : OP_EQUAL);
-                case Fragment::RIPEMD160: return BuildScript(OP_SIZE, 32, OP_EQUALVERIFY, OP_RIPEMD160, node.data, verify ? OP_EQUALVERIFY : OP_EQUAL);
-                case Fragment::HASH256: return BuildScript(OP_SIZE, 32, OP_EQUALVERIFY, OP_HASH256, node.data, verify ? OP_EQUALVERIFY : OP_EQUAL);
-                case Fragment::HASH160: return BuildScript(OP_SIZE, 32, OP_EQUALVERIFY, OP_HASH160, node.data, verify ? OP_EQUALVERIFY : OP_EQUAL);
-                case Fragment::WRAP_A: return BuildScript(OP_TOALTSTACK, subs[0], OP_FROMALTSTACK);
-                case Fragment::WRAP_S: return BuildScript(OP_SWAP, subs[0]);
-                case Fragment::WRAP_C: return BuildScript(std::move(subs[0]), verify ? OP_CHECKSIGVERIFY : OP_CHECKSIG);
-                case Fragment::WRAP_D: return BuildScript(OP_DUP, OP_IF, subs[0], OP_ENDIF);
-                case Fragment::WRAP_V: {
-                    if (node.subs[0]->GetType() << "x"_mst) {
-                        return BuildScript(std::move(subs[0]), OP_VERIFY);
-                    } else {
-                        return std::move(subs[0]);
-                    }
+            case Fragment::PK_K: return BuildScript(ctx.ToPKBytes(node.keys[0]));
+            case Fragment::PK_H: return BuildScript(OP_DUP, OP_HASH160, ctx.ToPKHBytes(node.keys[0]), OP_EQUALVERIFY);
+            case Fragment::OLDER: return BuildScript(node.k, OP_CHECKSEQUENCEVERIFY);
+            case Fragment::AFTER: return BuildScript(node.k, OP_CHECKLOCKTIMEVERIFY);
+            case Fragment::SHA256: return BuildScript(OP_SIZE, 32, OP_EQUALVERIFY, OP_SHA256, node.data, verify ? OP_EQUALVERIFY : OP_EQUAL);
+            case Fragment::RIPEMD160: return BuildScript(OP_SIZE, 32, OP_EQUALVERIFY, OP_RIPEMD160, node.data, verify ? OP_EQUALVERIFY : OP_EQUAL);
+            case Fragment::HASH256: return BuildScript(OP_SIZE, 32, OP_EQUALVERIFY, OP_HASH256, node.data, verify ? OP_EQUALVERIFY : OP_EQUAL);
+            case Fragment::HASH160: return BuildScript(OP_SIZE, 32, OP_EQUALVERIFY, OP_HASH160, node.data, verify ? OP_EQUALVERIFY : OP_EQUAL);
+            case Fragment::WRAP_A: return BuildScript(OP_TOALTSTACK, subs[0], OP_FROMALTSTACK);
+            case Fragment::WRAP_S: return BuildScript(OP_SWAP, subs[0]);
+            case Fragment::WRAP_C: return BuildScript(std::move(subs[0]), verify ? OP_CHECKSIGVERIFY : OP_CHECKSIG);
+            case Fragment::WRAP_D: return BuildScript(OP_DUP, OP_IF, subs[0], OP_ENDIF);
+            case Fragment::WRAP_V: {
+                if (node.subs[0]->GetType() << "x"_mst) {
+                    return BuildScript(std::move(subs[0]), OP_VERIFY);
+                } else {
+                    return std::move(subs[0]);
                 }
-                case Fragment::WRAP_J: return BuildScript(OP_SIZE, OP_0NOTEQUAL, OP_IF, subs[0], OP_ENDIF);
-                case Fragment::WRAP_N: return BuildScript(std::move(subs[0]), OP_0NOTEQUAL);
-                case Fragment::JUST_1: return BuildScript(OP_1);
-                case Fragment::JUST_0: return BuildScript(OP_0);
-                case Fragment::AND_V: return BuildScript(std::move(subs[0]), subs[1]);
-                case Fragment::AND_B: return BuildScript(std::move(subs[0]), subs[1], OP_BOOLAND);
-                case Fragment::OR_B: return BuildScript(std::move(subs[0]), subs[1], OP_BOOLOR);
-                case Fragment::OR_D: return BuildScript(std::move(subs[0]), OP_IFDUP, OP_NOTIF, subs[1], OP_ENDIF);
-                case Fragment::OR_C: return BuildScript(std::move(subs[0]), OP_NOTIF, subs[1], OP_ENDIF);
-                case Fragment::OR_I: return BuildScript(OP_IF, subs[0], OP_ELSE, subs[1], OP_ENDIF);
-                case Fragment::ANDOR: return BuildScript(std::move(subs[0]), OP_NOTIF, subs[2], OP_ELSE, subs[1], OP_ENDIF);
-                case Fragment::MULTI: {
-                    CScript script = BuildScript(node.k);
-                    for (const auto& key : node.keys) {
-                        script = BuildScript(std::move(script), ctx.ToPKBytes(key));
-                    }
-                    return BuildScript(std::move(script), node.keys.size(), verify ? OP_CHECKMULTISIGVERIFY : OP_CHECKMULTISIG);
+            }
+            case Fragment::WRAP_J: return BuildScript(OP_SIZE, OP_0NOTEQUAL, OP_IF, subs[0], OP_ENDIF);
+            case Fragment::WRAP_N: return BuildScript(std::move(subs[0]), OP_0NOTEQUAL);
+            case Fragment::JUST_1: return BuildScript(OP_1);
+            case Fragment::JUST_0: return BuildScript(OP_0);
+            case Fragment::AND_V: return BuildScript(std::move(subs[0]), subs[1]);
+            case Fragment::AND_B: return BuildScript(std::move(subs[0]), subs[1], OP_BOOLAND);
+            case Fragment::OR_B: return BuildScript(std::move(subs[0]), subs[1], OP_BOOLOR);
+            case Fragment::OR_D: return BuildScript(std::move(subs[0]), OP_IFDUP, OP_NOTIF, subs[1], OP_ENDIF);
+            case Fragment::OR_C: return BuildScript(std::move(subs[0]), OP_NOTIF, subs[1], OP_ENDIF);
+            case Fragment::OR_I: return BuildScript(OP_IF, subs[0], OP_ELSE, subs[1], OP_ENDIF);
+            case Fragment::ANDOR: return BuildScript(std::move(subs[0]), OP_NOTIF, subs[2], OP_ELSE, subs[1], OP_ENDIF);
+            case Fragment::MULTI: {
+                CScript script = BuildScript(node.k);
+                for (const auto& key : node.keys) {
+                    script = BuildScript(std::move(script), ctx.ToPKBytes(key));
                 }
-                case Fragment::THRESH: {
-                    CScript script = std::move(subs[0]);
-                    for (size_t i = 1; i < subs.size(); ++i) {
-                        script = BuildScript(std::move(script), subs[i], OP_ADD);
-                    }
-                    return BuildScript(std::move(script), node.k, verify ? OP_EQUALVERIFY : OP_EQUAL);
+                return BuildScript(std::move(script), node.keys.size(), verify ? OP_CHECKMULTISIGVERIFY : OP_CHECKMULTISIG);
+            }
+            case Fragment::THRESH: {
+                CScript script = std::move(subs[0]);
+                for (size_t i = 1; i < subs.size(); ++i) {
+                    script = BuildScript(std::move(script), subs[i], OP_ADD);
                 }
+                return BuildScript(std::move(script), node.k, verify ? OP_EQUALVERIFY : OP_EQUAL);
+            }
             }
             assert(false);
         };
         return TreeEval<CScript>(false, downfn, upfn);
     }
 
-    template<typename CTx>
-    std::optional<std::string> ToString(const CTx& ctx) const {
+    template <typename CTx>
+    std::optional<std::string> ToString(const CTx& ctx) const
+    {
         // To construct the std::string representation for a Miniscript object, we use
         // the TreeEvalMaybe algorithm. The State is a boolean: whether the parent node is a
         // wrapper. If so, non-wrapper expressions must be prefixed with a ":".
@@ -639,82 +671,82 @@ public:
             std::string ret = wrapped ? ":" : "";
 
             switch (node.fragment) {
-                case Fragment::WRAP_A: return "a" + std::move(subs[0]);
-                case Fragment::WRAP_S: return "s" + std::move(subs[0]);
-                case Fragment::WRAP_C:
-                    if (node.subs[0]->fragment == Fragment::PK_K) {
-                        // pk(K) is syntactic sugar for c:pk_k(K)
-                        auto key_str = ctx.ToString(node.subs[0]->keys[0]);
-                        if (!key_str) return {};
-                        return std::move(ret) + "pk(" + std::move(*key_str) + ")";
-                    }
-                    if (node.subs[0]->fragment == Fragment::PK_H) {
-                        // pkh(K) is syntactic sugar for c:pk_h(K)
-                        auto key_str = ctx.ToString(node.subs[0]->keys[0]);
-                        if (!key_str) return {};
-                        return std::move(ret) + "pkh(" + std::move(*key_str) + ")";
-                    }
-                    return "c" + std::move(subs[0]);
-                case Fragment::WRAP_D: return "d" + std::move(subs[0]);
-                case Fragment::WRAP_V: return "v" + std::move(subs[0]);
-                case Fragment::WRAP_J: return "j" + std::move(subs[0]);
-                case Fragment::WRAP_N: return "n" + std::move(subs[0]);
-                case Fragment::AND_V:
-                    // t:X is syntactic sugar for and_v(X,1).
-                    if (node.subs[1]->fragment == Fragment::JUST_1) return "t" + std::move(subs[0]);
-                    break;
-                case Fragment::OR_I:
-                    if (node.subs[0]->fragment == Fragment::JUST_0) return "l" + std::move(subs[1]);
-                    if (node.subs[1]->fragment == Fragment::JUST_0) return "u" + std::move(subs[0]);
-                    break;
-                default: break;
+            case Fragment::WRAP_A: return "a" + std::move(subs[0]);
+            case Fragment::WRAP_S: return "s" + std::move(subs[0]);
+            case Fragment::WRAP_C:
+                if (node.subs[0]->fragment == Fragment::PK_K) {
+                    // pk(K) is syntactic sugar for c:pk_k(K)
+                    auto key_str = ctx.ToString(node.subs[0]->keys[0]);
+                    if (!key_str) return {};
+                    return std::move(ret) + "pk(" + std::move(*key_str) + ")";
+                }
+                if (node.subs[0]->fragment == Fragment::PK_H) {
+                    // pkh(K) is syntactic sugar for c:pk_h(K)
+                    auto key_str = ctx.ToString(node.subs[0]->keys[0]);
+                    if (!key_str) return {};
+                    return std::move(ret) + "pkh(" + std::move(*key_str) + ")";
+                }
+                return "c" + std::move(subs[0]);
+            case Fragment::WRAP_D: return "d" + std::move(subs[0]);
+            case Fragment::WRAP_V: return "v" + std::move(subs[0]);
+            case Fragment::WRAP_J: return "j" + std::move(subs[0]);
+            case Fragment::WRAP_N: return "n" + std::move(subs[0]);
+            case Fragment::AND_V:
+                // t:X is syntactic sugar for and_v(X,1).
+                if (node.subs[1]->fragment == Fragment::JUST_1) return "t" + std::move(subs[0]);
+                break;
+            case Fragment::OR_I:
+                if (node.subs[0]->fragment == Fragment::JUST_0) return "l" + std::move(subs[1]);
+                if (node.subs[1]->fragment == Fragment::JUST_0) return "u" + std::move(subs[0]);
+                break;
+            default: break;
             }
             switch (node.fragment) {
-                case Fragment::PK_K: {
-                    auto key_str = ctx.ToString(node.keys[0]);
+            case Fragment::PK_K: {
+                auto key_str = ctx.ToString(node.keys[0]);
+                if (!key_str) return {};
+                return std::move(ret) + "pk_k(" + std::move(*key_str) + ")";
+            }
+            case Fragment::PK_H: {
+                auto key_str = ctx.ToString(node.keys[0]);
+                if (!key_str) return {};
+                return std::move(ret) + "pk_h(" + std::move(*key_str) + ")";
+            }
+            case Fragment::AFTER: return std::move(ret) + "after(" + ::ToString(node.k) + ")";
+            case Fragment::OLDER: return std::move(ret) + "older(" + ::ToString(node.k) + ")";
+            case Fragment::HASH256: return std::move(ret) + "hash256(" + HexStr(node.data) + ")";
+            case Fragment::HASH160: return std::move(ret) + "hash160(" + HexStr(node.data) + ")";
+            case Fragment::SHA256: return std::move(ret) + "sha256(" + HexStr(node.data) + ")";
+            case Fragment::RIPEMD160: return std::move(ret) + "ripemd160(" + HexStr(node.data) + ")";
+            case Fragment::JUST_1: return std::move(ret) + "1";
+            case Fragment::JUST_0: return std::move(ret) + "0";
+            case Fragment::AND_V: return std::move(ret) + "and_v(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
+            case Fragment::AND_B: return std::move(ret) + "and_b(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
+            case Fragment::OR_B: return std::move(ret) + "or_b(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
+            case Fragment::OR_D: return std::move(ret) + "or_d(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
+            case Fragment::OR_C: return std::move(ret) + "or_c(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
+            case Fragment::OR_I: return std::move(ret) + "or_i(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
+            case Fragment::ANDOR:
+                // and_n(X,Y) is syntactic sugar for andor(X,Y,0).
+                if (node.subs[2]->fragment == Fragment::JUST_0) return std::move(ret) + "and_n(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
+                return std::move(ret) + "andor(" + std::move(subs[0]) + "," + std::move(subs[1]) + "," + std::move(subs[2]) + ")";
+            case Fragment::MULTI: {
+                auto str = std::move(ret) + "multi(" + ::ToString(node.k);
+                for (const auto& key : node.keys) {
+                    auto key_str = ctx.ToString(key);
                     if (!key_str) return {};
-                    return std::move(ret) + "pk_k(" + std::move(*key_str) + ")";
+                    str += "," + std::move(*key_str);
                 }
-                case Fragment::PK_H: {
-                    auto key_str = ctx.ToString(node.keys[0]);
-                    if (!key_str) return {};
-                    return std::move(ret) + "pk_h(" + std::move(*key_str) + ")";
+                return std::move(str) + ")";
+            }
+            case Fragment::THRESH: {
+                auto str = std::move(ret) + "thresh(" + ::ToString(node.k);
+                for (auto& sub : subs) {
+                    str += "," + std::move(sub);
                 }
-                case Fragment::AFTER: return std::move(ret) + "after(" + ::ToString(node.k) + ")";
-                case Fragment::OLDER: return std::move(ret) + "older(" + ::ToString(node.k) + ")";
-                case Fragment::HASH256: return std::move(ret) + "hash256(" + HexStr(node.data) + ")";
-                case Fragment::HASH160: return std::move(ret) + "hash160(" + HexStr(node.data) + ")";
-                case Fragment::SHA256: return std::move(ret) + "sha256(" + HexStr(node.data) + ")";
-                case Fragment::RIPEMD160: return std::move(ret) + "ripemd160(" + HexStr(node.data) + ")";
-                case Fragment::JUST_1: return std::move(ret) + "1";
-                case Fragment::JUST_0: return std::move(ret) + "0";
-                case Fragment::AND_V: return std::move(ret) + "and_v(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
-                case Fragment::AND_B: return std::move(ret) + "and_b(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
-                case Fragment::OR_B: return std::move(ret) + "or_b(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
-                case Fragment::OR_D: return std::move(ret) + "or_d(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
-                case Fragment::OR_C: return std::move(ret) + "or_c(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
-                case Fragment::OR_I: return std::move(ret) + "or_i(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
-                case Fragment::ANDOR:
-                    // and_n(X,Y) is syntactic sugar for andor(X,Y,0).
-                    if (node.subs[2]->fragment == Fragment::JUST_0) return std::move(ret) + "and_n(" + std::move(subs[0]) + "," + std::move(subs[1]) + ")";
-                    return std::move(ret) + "andor(" + std::move(subs[0]) + "," + std::move(subs[1]) + "," + std::move(subs[2]) + ")";
-                case Fragment::MULTI: {
-                    auto str = std::move(ret) + "multi(" + ::ToString(node.k);
-                    for (const auto& key : node.keys) {
-                        auto key_str = ctx.ToString(key);
-                        if (!key_str) return {};
-                        str += "," + std::move(*key_str);
-                    }
-                    return std::move(str) + ")";
-                }
-                case Fragment::THRESH: {
-                    auto str = std::move(ret) + "thresh(" + ::ToString(node.k);
-                    for (auto& sub : subs) {
-                        str += "," + std::move(sub);
-                    }
-                    return std::move(str) + ")";
-                }
-                default: break;
+                return std::move(str) + ")";
+            }
+            default: break;
             }
             assert(false);
         };
@@ -723,298 +755,306 @@ public:
     }
 
 private:
-    internal::Ops CalcOps() const {
+    internal::Ops CalcOps() const
+    {
         switch (fragment) {
-            case Fragment::JUST_1: return {0, 0, {}};
-            case Fragment::JUST_0: return {0, {}, 0};
-            case Fragment::PK_K: return {0, 0, 0};
-            case Fragment::PK_H: return {3, 0, 0};
-            case Fragment::OLDER:
-            case Fragment::AFTER: return {1, 0, {}};
-            case Fragment::SHA256:
-            case Fragment::RIPEMD160:
-            case Fragment::HASH256:
-            case Fragment::HASH160: return {4, 0, {}};
-            case Fragment::AND_V: return {subs[0]->ops.count + subs[1]->ops.count, subs[0]->ops.sat + subs[1]->ops.sat, {}};
-            case Fragment::AND_B: {
-                const auto count{1 + subs[0]->ops.count + subs[1]->ops.count};
-                const auto sat{subs[0]->ops.sat + subs[1]->ops.sat};
-                const auto dsat{subs[0]->ops.dsat + subs[1]->ops.dsat};
-                return {count, sat, dsat};
+        case Fragment::JUST_1: return {0, 0, {}};
+        case Fragment::JUST_0: return {0, {}, 0};
+        case Fragment::PK_K: return {0, 0, 0};
+        case Fragment::PK_H: return {3, 0, 0};
+        case Fragment::OLDER:
+        case Fragment::AFTER: return {1, 0, {}};
+        case Fragment::SHA256:
+        case Fragment::RIPEMD160:
+        case Fragment::HASH256:
+        case Fragment::HASH160: return {4, 0, {}};
+        case Fragment::AND_V: return {subs[0]->ops.count + subs[1]->ops.count, subs[0]->ops.sat + subs[1]->ops.sat, {}};
+        case Fragment::AND_B: {
+            const auto count{1 + subs[0]->ops.count + subs[1]->ops.count};
+            const auto sat{subs[0]->ops.sat + subs[1]->ops.sat};
+            const auto dsat{subs[0]->ops.dsat + subs[1]->ops.dsat};
+            return {count, sat, dsat};
+        }
+        case Fragment::OR_B: {
+            const auto count{1 + subs[0]->ops.count + subs[1]->ops.count};
+            const auto sat{(subs[0]->ops.sat + subs[1]->ops.dsat) | (subs[1]->ops.sat + subs[0]->ops.dsat)};
+            const auto dsat{subs[0]->ops.dsat + subs[1]->ops.dsat};
+            return {count, sat, dsat};
+        }
+        case Fragment::OR_D: {
+            const auto count{3 + subs[0]->ops.count + subs[1]->ops.count};
+            const auto sat{subs[0]->ops.sat | (subs[1]->ops.sat + subs[0]->ops.dsat)};
+            const auto dsat{subs[0]->ops.dsat + subs[1]->ops.dsat};
+            return {count, sat, dsat};
+        }
+        case Fragment::OR_C: {
+            const auto count{2 + subs[0]->ops.count + subs[1]->ops.count};
+            const auto sat{subs[0]->ops.sat | (subs[1]->ops.sat + subs[0]->ops.dsat)};
+            return {count, sat, {}};
+        }
+        case Fragment::OR_I: {
+            const auto count{3 + subs[0]->ops.count + subs[1]->ops.count};
+            const auto sat{subs[0]->ops.sat | subs[1]->ops.sat};
+            const auto dsat{subs[0]->ops.dsat | subs[1]->ops.dsat};
+            return {count, sat, dsat};
+        }
+        case Fragment::ANDOR: {
+            const auto count{3 + subs[0]->ops.count + subs[1]->ops.count + subs[2]->ops.count};
+            const auto sat{(subs[1]->ops.sat + subs[0]->ops.sat) | (subs[0]->ops.dsat + subs[2]->ops.sat)};
+            const auto dsat{subs[0]->ops.dsat + subs[2]->ops.dsat};
+            return {count, sat, dsat};
+        }
+        case Fragment::MULTI: return {1, (uint32_t)keys.size(), (uint32_t)keys.size()};
+        case Fragment::WRAP_S:
+        case Fragment::WRAP_C:
+        case Fragment::WRAP_N: return {1 + subs[0]->ops.count, subs[0]->ops.sat, subs[0]->ops.dsat};
+        case Fragment::WRAP_A: return {2 + subs[0]->ops.count, subs[0]->ops.sat, subs[0]->ops.dsat};
+        case Fragment::WRAP_D: return {3 + subs[0]->ops.count, subs[0]->ops.sat, 0};
+        case Fragment::WRAP_J: return {4 + subs[0]->ops.count, subs[0]->ops.sat, 0};
+        case Fragment::WRAP_V: return {subs[0]->ops.count + (subs[0]->GetType() << "x"_mst), subs[0]->ops.sat, {}};
+        case Fragment::THRESH: {
+            uint32_t count = 0;
+            auto sats = Vector(internal::MaxInt<uint32_t>(0));
+            for (const auto& sub : subs) {
+                count += sub->ops.count + 1;
+                auto next_sats = Vector(sats[0] + sub->ops.dsat);
+                for (size_t j = 1; j < sats.size(); ++j)
+                    next_sats.push_back((sats[j] + sub->ops.dsat) | (sats[j - 1] + sub->ops.sat));
+                next_sats.push_back(sats[sats.size() - 1] + sub->ops.sat);
+                sats = std::move(next_sats);
             }
-            case Fragment::OR_B: {
-                const auto count{1 + subs[0]->ops.count + subs[1]->ops.count};
-                const auto sat{(subs[0]->ops.sat + subs[1]->ops.dsat) | (subs[1]->ops.sat + subs[0]->ops.dsat)};
-                const auto dsat{subs[0]->ops.dsat + subs[1]->ops.dsat};
-                return {count, sat, dsat};
-            }
-            case Fragment::OR_D: {
-                const auto count{3 + subs[0]->ops.count + subs[1]->ops.count};
-                const auto sat{subs[0]->ops.sat | (subs[1]->ops.sat + subs[0]->ops.dsat)};
-                const auto dsat{subs[0]->ops.dsat + subs[1]->ops.dsat};
-                return {count, sat, dsat};
-            }
-            case Fragment::OR_C: {
-                const auto count{2 + subs[0]->ops.count + subs[1]->ops.count};
-                const auto sat{subs[0]->ops.sat | (subs[1]->ops.sat + subs[0]->ops.dsat)};
-                return {count, sat, {}};
-            }
-            case Fragment::OR_I: {
-                const auto count{3 + subs[0]->ops.count + subs[1]->ops.count};
-                const auto sat{subs[0]->ops.sat | subs[1]->ops.sat};
-                const auto dsat{subs[0]->ops.dsat | subs[1]->ops.dsat};
-                return {count, sat, dsat};
-            }
-            case Fragment::ANDOR: {
-                const auto count{3 + subs[0]->ops.count + subs[1]->ops.count + subs[2]->ops.count};
-                const auto sat{(subs[1]->ops.sat + subs[0]->ops.sat) | (subs[0]->ops.dsat + subs[2]->ops.sat)};
-                const auto dsat{subs[0]->ops.dsat + subs[2]->ops.dsat};
-                return {count, sat, dsat};
-            }
-            case Fragment::MULTI: return {1, (uint32_t)keys.size(), (uint32_t)keys.size()};
-            case Fragment::WRAP_S:
-            case Fragment::WRAP_C:
-            case Fragment::WRAP_N: return {1 + subs[0]->ops.count, subs[0]->ops.sat, subs[0]->ops.dsat};
-            case Fragment::WRAP_A: return {2 + subs[0]->ops.count, subs[0]->ops.sat, subs[0]->ops.dsat};
-            case Fragment::WRAP_D: return {3 + subs[0]->ops.count, subs[0]->ops.sat, 0};
-            case Fragment::WRAP_J: return {4 + subs[0]->ops.count, subs[0]->ops.sat, 0};
-            case Fragment::WRAP_V: return {subs[0]->ops.count + (subs[0]->GetType() << "x"_mst), subs[0]->ops.sat, {}};
-            case Fragment::THRESH: {
-                uint32_t count = 0;
-                auto sats = Vector(internal::MaxInt<uint32_t>(0));
-                for (const auto& sub : subs) {
-                    count += sub->ops.count + 1;
-                    auto next_sats = Vector(sats[0] + sub->ops.dsat);
-                    for (size_t j = 1; j < sats.size(); ++j) next_sats.push_back((sats[j] + sub->ops.dsat) | (sats[j - 1] + sub->ops.sat));
-                    next_sats.push_back(sats[sats.size() - 1] + sub->ops.sat);
-                    sats = std::move(next_sats);
-                }
-                assert(k <= sats.size());
-                return {count, sats[k], sats[0]};
-            }
+            assert(k <= sats.size());
+            return {count, sats[k], sats[0]};
+        }
         }
         assert(false);
     }
 
-    internal::StackSize CalcStackSize() const {
+    internal::StackSize CalcStackSize() const
+    {
         switch (fragment) {
-            case Fragment::JUST_0: return {{}, 0};
-            case Fragment::JUST_1:
-            case Fragment::OLDER:
-            case Fragment::AFTER: return {0, {}};
-            case Fragment::PK_K: return {1, 1};
-            case Fragment::PK_H: return {2, 2};
-            case Fragment::SHA256:
-            case Fragment::RIPEMD160:
-            case Fragment::HASH256:
-            case Fragment::HASH160: return {1, {}};
-            case Fragment::ANDOR: {
-                const auto sat{(subs[0]->ss.sat + subs[1]->ss.sat) | (subs[0]->ss.dsat + subs[2]->ss.sat)};
-                const auto dsat{subs[0]->ss.dsat + subs[2]->ss.dsat};
-                return {sat, dsat};
+        case Fragment::JUST_0: return {{}, 0};
+        case Fragment::JUST_1:
+        case Fragment::OLDER:
+        case Fragment::AFTER: return {0, {}};
+        case Fragment::PK_K: return {1, 1};
+        case Fragment::PK_H: return {2, 2};
+        case Fragment::SHA256:
+        case Fragment::RIPEMD160:
+        case Fragment::HASH256:
+        case Fragment::HASH160: return {1, {}};
+        case Fragment::ANDOR: {
+            const auto sat{(subs[0]->ss.sat + subs[1]->ss.sat) | (subs[0]->ss.dsat + subs[2]->ss.sat)};
+            const auto dsat{subs[0]->ss.dsat + subs[2]->ss.dsat};
+            return {sat, dsat};
+        }
+        case Fragment::AND_V: return {subs[0]->ss.sat + subs[1]->ss.sat, {}};
+        case Fragment::AND_B: return {subs[0]->ss.sat + subs[1]->ss.sat, subs[0]->ss.dsat + subs[1]->ss.dsat};
+        case Fragment::OR_B: {
+            const auto sat{(subs[0]->ss.dsat + subs[1]->ss.sat) | (subs[0]->ss.sat + subs[1]->ss.dsat)};
+            const auto dsat{subs[0]->ss.dsat + subs[1]->ss.dsat};
+            return {sat, dsat};
+        }
+        case Fragment::OR_C: return {subs[0]->ss.sat | (subs[0]->ss.dsat + subs[1]->ss.sat), {}};
+        case Fragment::OR_D: return {subs[0]->ss.sat | (subs[0]->ss.dsat + subs[1]->ss.sat), subs[0]->ss.dsat + subs[1]->ss.dsat};
+        case Fragment::OR_I: return {(subs[0]->ss.sat + 1) | (subs[1]->ss.sat + 1), (subs[0]->ss.dsat + 1) | (subs[1]->ss.dsat + 1)};
+        case Fragment::MULTI: return {k + 1, k + 1};
+        case Fragment::WRAP_A:
+        case Fragment::WRAP_N:
+        case Fragment::WRAP_S:
+        case Fragment::WRAP_C: return subs[0]->ss;
+        case Fragment::WRAP_D: return {1 + subs[0]->ss.sat, 1};
+        case Fragment::WRAP_V: return {subs[0]->ss.sat, {}};
+        case Fragment::WRAP_J: return {subs[0]->ss.sat, 1};
+        case Fragment::THRESH: {
+            auto sats = Vector(internal::MaxInt<uint32_t>(0));
+            for (const auto& sub : subs) {
+                auto next_sats = Vector(sats[0] + sub->ss.dsat);
+                for (size_t j = 1; j < sats.size(); ++j)
+                    next_sats.push_back((sats[j] + sub->ss.dsat) | (sats[j - 1] + sub->ss.sat));
+                next_sats.push_back(sats[sats.size() - 1] + sub->ss.sat);
+                sats = std::move(next_sats);
             }
-            case Fragment::AND_V: return {subs[0]->ss.sat + subs[1]->ss.sat, {}};
-            case Fragment::AND_B: return {subs[0]->ss.sat + subs[1]->ss.sat, subs[0]->ss.dsat + subs[1]->ss.dsat};
-            case Fragment::OR_B: {
-                const auto sat{(subs[0]->ss.dsat + subs[1]->ss.sat) | (subs[0]->ss.sat + subs[1]->ss.dsat)};
-                const auto dsat{subs[0]->ss.dsat + subs[1]->ss.dsat};
-                return {sat, dsat};
-            }
-            case Fragment::OR_C: return {subs[0]->ss.sat | (subs[0]->ss.dsat + subs[1]->ss.sat), {}};
-            case Fragment::OR_D: return {subs[0]->ss.sat | (subs[0]->ss.dsat + subs[1]->ss.sat), subs[0]->ss.dsat + subs[1]->ss.dsat};
-            case Fragment::OR_I: return {(subs[0]->ss.sat + 1) | (subs[1]->ss.sat + 1), (subs[0]->ss.dsat + 1) | (subs[1]->ss.dsat + 1)};
-            case Fragment::MULTI: return {k + 1, k + 1};
-            case Fragment::WRAP_A:
-            case Fragment::WRAP_N:
-            case Fragment::WRAP_S:
-            case Fragment::WRAP_C: return subs[0]->ss;
-            case Fragment::WRAP_D: return {1 + subs[0]->ss.sat, 1};
-            case Fragment::WRAP_V: return {subs[0]->ss.sat, {}};
-            case Fragment::WRAP_J: return {subs[0]->ss.sat, 1};
-            case Fragment::THRESH: {
-                auto sats = Vector(internal::MaxInt<uint32_t>(0));
-                for (const auto& sub : subs) {
-                    auto next_sats = Vector(sats[0] + sub->ss.dsat);
-                    for (size_t j = 1; j < sats.size(); ++j) next_sats.push_back((sats[j] + sub->ss.dsat) | (sats[j - 1] + sub->ss.sat));
-                    next_sats.push_back(sats[sats.size() - 1] + sub->ss.sat);
-                    sats = std::move(next_sats);
-                }
-                assert(k <= sats.size());
-                return {sats[k], sats[0]};
-            }
+            assert(k <= sats.size());
+            return {sats[k], sats[0]};
+        }
         }
         assert(false);
     }
 
-    template<typename Ctx>
-    internal::InputResult ProduceInput(const Ctx& ctx) const {
+    template <typename Ctx>
+    internal::InputResult ProduceInput(const Ctx& ctx) const
+    {
         using namespace internal;
 
         // Internal function which is invoked for every tree node, constructing satisfaction/dissatisfactions
         // given those of its subnodes.
         auto helper = [&ctx](const Node& node, Span<InputResult> subres) -> InputResult {
             switch (node.fragment) {
-                case Fragment::PK_K: {
+            case Fragment::PK_K: {
+                std::vector<unsigned char> sig;
+                Availability avail = ctx.Sign(node.keys[0], sig);
+                return {ZERO, InputStack(std::move(sig)).SetWithSig().SetAvailable(avail)};
+            }
+            case Fragment::PK_H: {
+                std::vector<unsigned char> key = ctx.ToPKBytes(node.keys[0]), sig;
+                Availability avail = ctx.Sign(node.keys[0], sig);
+                return {ZERO + InputStack(key), (InputStack(std::move(sig)).SetWithSig() + InputStack(key)).SetAvailable(avail)};
+            }
+            case Fragment::MULTI: {
+                // sats[j] represents the best stack containing j valid signatures (out of the first i keys).
+                // In the loop below, these stacks are built up using a dynamic programming approach.
+                // sats[0] starts off being {0}, due to the CHECKMULTISIG bug that pops off one element too many.
+                std::vector<InputStack> sats = Vector(ZERO);
+                for (size_t i = 0; i < node.keys.size(); ++i) {
                     std::vector<unsigned char> sig;
-                    Availability avail = ctx.Sign(node.keys[0], sig);
-                    return {ZERO, InputStack(std::move(sig)).SetWithSig().SetAvailable(avail)};
+                    Availability avail = ctx.Sign(node.keys[i], sig);
+                    // Compute signature stack for just the i'th key.
+                    auto sat = InputStack(std::move(sig)).SetWithSig().SetAvailable(avail);
+                    // Compute the next sats vector: next_sats[0] is a copy of sats[0] (no signatures). All further
+                    // next_sats[j] are equal to either the existing sats[j], or sats[j-1] plus a signature for the
+                    // current (i'th) key. The very last element needs all signatures filled.
+                    std::vector<InputStack> next_sats;
+                    next_sats.push_back(sats[0]);
+                    for (size_t j = 1; j < sats.size(); ++j)
+                        next_sats.push_back(sats[j] | (std::move(sats[j - 1]) + sat));
+                    next_sats.push_back(std::move(sats[sats.size() - 1]) + std::move(sat));
+                    // Switch over.
+                    sats = std::move(next_sats);
                 }
-                case Fragment::PK_H: {
-                    std::vector<unsigned char> key = ctx.ToPKBytes(node.keys[0]), sig;
-                    Availability avail = ctx.Sign(node.keys[0], sig);
-                    return {ZERO + InputStack(key), (InputStack(std::move(sig)).SetWithSig() + InputStack(key)).SetAvailable(avail)};
+                // The dissatisfaction consists of k+1 stack elements all equal to 0.
+                InputStack nsat = ZERO;
+                for (size_t i = 0; i < node.k; ++i)
+                    nsat = std::move(nsat) + ZERO;
+                assert(node.k <= sats.size());
+                return {std::move(nsat), std::move(sats[node.k])};
+            }
+            case Fragment::THRESH: {
+                // sats[k] represents the best stack that satisfies k out of the *last* i subexpressions.
+                // In the loop below, these stacks are built up using a dynamic programming approach.
+                // sats[0] starts off empty.
+                std::vector<InputStack> sats = Vector(EMPTY);
+                for (size_t i = 0; i < subres.size(); ++i) {
+                    // Introduce an alias for the i'th last satisfaction/dissatisfaction.
+                    auto& res = subres[subres.size() - i - 1];
+                    // Compute the next sats vector: next_sats[0] is sats[0] plus res.nsat (thus containing all dissatisfactions
+                    // so far. next_sats[j] is either sats[j] + res.nsat (reusing j earlier satisfactions) or sats[j-1] + res.sat
+                    // (reusing j-1 earlier satisfactions plus a new one). The very last next_sats[j] is all satisfactions.
+                    std::vector<InputStack> next_sats;
+                    next_sats.push_back(sats[0] + res.nsat);
+                    for (size_t j = 1; j < sats.size(); ++j)
+                        next_sats.push_back((sats[j] + res.nsat) | (std::move(sats[j - 1]) + res.sat));
+                    next_sats.push_back(std::move(sats[sats.size() - 1]) + std::move(res.sat));
+                    // Switch over.
+                    sats = std::move(next_sats);
                 }
-                case Fragment::MULTI: {
-                    // sats[j] represents the best stack containing j valid signatures (out of the first i keys).
-                    // In the loop below, these stacks are built up using a dynamic programming approach.
-                    // sats[0] starts off being {0}, due to the CHECKMULTISIG bug that pops off one element too many.
-                    std::vector<InputStack> sats = Vector(ZERO);
-                    for (size_t i = 0; i < node.keys.size(); ++i) {
-                        std::vector<unsigned char> sig;
-                        Availability avail = ctx.Sign(node.keys[i], sig);
-                        // Compute signature stack for just the i'th key.
-                        auto sat = InputStack(std::move(sig)).SetWithSig().SetAvailable(avail);
-                        // Compute the next sats vector: next_sats[0] is a copy of sats[0] (no signatures). All further
-                        // next_sats[j] are equal to either the existing sats[j], or sats[j-1] plus a signature for the
-                        // current (i'th) key. The very last element needs all signatures filled.
-                        std::vector<InputStack> next_sats;
-                        next_sats.push_back(sats[0]);
-                        for (size_t j = 1; j < sats.size(); ++j) next_sats.push_back(sats[j] | (std::move(sats[j - 1]) + sat));
-                        next_sats.push_back(std::move(sats[sats.size() - 1]) + std::move(sat));
-                        // Switch over.
-                        sats = std::move(next_sats);
-                    }
-                    // The dissatisfaction consists of k+1 stack elements all equal to 0.
-                    InputStack nsat = ZERO;
-                    for (size_t i = 0; i < node.k; ++i) nsat = std::move(nsat) + ZERO;
-                    assert(node.k <= sats.size());
-                    return {std::move(nsat), std::move(sats[node.k])};
+                // At this point, sats[k].sat is the best satisfaction for the overall thresh() node. The best dissatisfaction
+                // is computed by gathering all sats[i].nsat for i != k.
+                InputStack nsat = INVALID;
+                for (size_t i = 0; i < sats.size(); ++i) {
+                    // i==k is the satisfaction; i==0 is the canonical dissatisfaction;
+                    // the rest are non-canonical (a no-signature dissatisfaction - the i=0
+                    // form - is always available) and malleable (due to overcompleteness).
+                    // Marking the solutions malleable here is not strictly necessary, as they
+                    // should already never be picked in non-malleable solutions due to the
+                    // availability of the i=0 form.
+                    if (i != 0 && i != node.k) sats[i].SetMalleable().SetNonCanon();
+                    // Include all dissatisfactions (even these non-canonical ones) in nsat.
+                    if (i != node.k) nsat = std::move(nsat) | std::move(sats[i]);
                 }
-                case Fragment::THRESH: {
-                    // sats[k] represents the best stack that satisfies k out of the *last* i subexpressions.
-                    // In the loop below, these stacks are built up using a dynamic programming approach.
-                    // sats[0] starts off empty.
-                    std::vector<InputStack> sats = Vector(EMPTY);
-                    for (size_t i = 0; i < subres.size(); ++i) {
-                        // Introduce an alias for the i'th last satisfaction/dissatisfaction.
-                        auto& res = subres[subres.size() - i - 1];
-                        // Compute the next sats vector: next_sats[0] is sats[0] plus res.nsat (thus containing all dissatisfactions
-                        // so far. next_sats[j] is either sats[j] + res.nsat (reusing j earlier satisfactions) or sats[j-1] + res.sat
-                        // (reusing j-1 earlier satisfactions plus a new one). The very last next_sats[j] is all satisfactions.
-                        std::vector<InputStack> next_sats;
-                        next_sats.push_back(sats[0] + res.nsat);
-                        for (size_t j = 1; j < sats.size(); ++j) next_sats.push_back((sats[j] + res.nsat) | (std::move(sats[j - 1]) + res.sat));
-                        next_sats.push_back(std::move(sats[sats.size() - 1]) + std::move(res.sat));
-                        // Switch over.
-                        sats = std::move(next_sats);
-                    }
-                    // At this point, sats[k].sat is the best satisfaction for the overall thresh() node. The best dissatisfaction
-                    // is computed by gathering all sats[i].nsat for i != k.
-                    InputStack nsat = INVALID;
-                    for (size_t i = 0; i < sats.size(); ++i) {
-                        // i==k is the satisfaction; i==0 is the canonical dissatisfaction;
-                        // the rest are non-canonical (a no-signature dissatisfaction - the i=0
-                        // form - is always available) and malleable (due to overcompleteness).
-                        // Marking the solutions malleable here is not strictly necessary, as they
-                        // should already never be picked in non-malleable solutions due to the
-                        // availability of the i=0 form.
-                        if (i != 0 && i != node.k) sats[i].SetMalleable().SetNonCanon();
-                        // Include all dissatisfactions (even these non-canonical ones) in nsat.
-                        if (i != node.k) nsat = std::move(nsat) | std::move(sats[i]);
-                    }
-                    assert(node.k <= sats.size());
-                    return {std::move(nsat), std::move(sats[node.k])};
-                }
-                case Fragment::OLDER: {
-                    return {INVALID, ctx.CheckOlder(node.k) ? EMPTY : INVALID};
-                }
-                case Fragment::AFTER: {
-                    return {INVALID, ctx.CheckAfter(node.k) ? EMPTY : INVALID};
-                }
-                case Fragment::SHA256: {
-                    std::vector<unsigned char> preimage;
-                    Availability avail = ctx.SatSHA256(node.data, preimage);
-                    return {ZERO32, InputStack(std::move(preimage)).SetAvailable(avail)};
-                }
-                case Fragment::RIPEMD160: {
-                    std::vector<unsigned char> preimage;
-                    Availability avail = ctx.SatRIPEMD160(node.data, preimage);
-                    return {ZERO32, InputStack(std::move(preimage)).SetAvailable(avail)};
-                }
-                case Fragment::HASH256: {
-                    std::vector<unsigned char> preimage;
-                    Availability avail = ctx.SatHASH256(node.data, preimage);
-                    return {ZERO32, InputStack(std::move(preimage)).SetAvailable(avail)};
-                }
-                case Fragment::HASH160: {
-                    std::vector<unsigned char> preimage;
-                    Availability avail = ctx.SatHASH160(node.data, preimage);
-                    return {ZERO32, InputStack(std::move(preimage)).SetAvailable(avail)};
-                }
-                case Fragment::AND_V: {
-                    auto& x = subres[0], &y = subres[1];
-                    // As the dissatisfaction here only consist of a single option, it doesn't
-                    // actually need to be listed (it's not required for reasoning about malleability of
-                    // other options), and is never required (no valid miniscript relies on the ability
-                    // to satisfy the type V left subexpression). It's still listed here for
-                    // completeness, as a hypothetical (not currently implemented) satisfier that doesn't
-                    // care about malleability might in some cases prefer it still.
-                    return {(y.nsat + x.sat).SetNonCanon(), y.sat + x.sat};
-                }
-                case Fragment::AND_B: {
-                    auto& x = subres[0], &y = subres[1];
-                    // Note that it is not strictly necessary to mark the 2nd and 3rd dissatisfaction here
-                    // as malleable. While they are definitely malleable, they are also non-canonical due
-                    // to the guaranteed existence of a no-signature other dissatisfaction (the 1st)
-                    // option. Because of that, the 2nd and 3rd option will never be chosen, even if they
-                    // weren't marked as malleable.
-                    return {(y.nsat + x.nsat) | (y.sat + x.nsat).SetMalleable().SetNonCanon() | (y.nsat + x.sat).SetMalleable().SetNonCanon(), y.sat + x.sat};
-                }
-                case Fragment::OR_B: {
-                    auto& x = subres[0], &z = subres[1];
-                    // The (sat(Z) sat(X)) solution is overcomplete (attacker can change either into dsat).
-                    return {z.nsat + x.nsat, (z.nsat + x.sat) | (z.sat + x.nsat) | (z.sat + x.sat).SetMalleable().SetNonCanon()};
-                }
-                case Fragment::OR_C: {
-                    auto& x = subres[0], &z = subres[1];
-                    return {INVALID, std::move(x.sat) | (z.sat + x.nsat)};
-                }
-                case Fragment::OR_D: {
-                    auto& x = subres[0], &z = subres[1];
-                    return {z.nsat + x.nsat, std::move(x.sat) | (z.sat + x.nsat)};
-                }
-                case Fragment::OR_I: {
-                    auto& x = subres[0], &z = subres[1];
-                    return {(x.nsat + ONE) | (z.nsat + ZERO), (x.sat + ONE) | (z.sat + ZERO)};
-                }
-                case Fragment::ANDOR: {
-                    auto& x = subres[0], &y = subres[1], &z = subres[2];
-                    return {(y.nsat + x.sat).SetNonCanon() | (z.nsat + x.nsat), (y.sat + x.sat) | (z.sat + x.nsat)};
-                }
-                case Fragment::WRAP_A:
-                case Fragment::WRAP_S:
-                case Fragment::WRAP_C:
-                case Fragment::WRAP_N:
-                    return std::move(subres[0]);
-                case Fragment::WRAP_D: {
-                    auto &x = subres[0];
-                    return {ZERO, x.sat + ONE};
-                }
-                case Fragment::WRAP_J: {
-                    auto &x = subres[0];
-                    // If a dissatisfaction with a nonzero top stack element exists, an alternative dissatisfaction exists.
-                    // As the dissatisfaction logic currently doesn't keep track of this nonzeroness property, and thus even
-                    // if a dissatisfaction with a top zero element is found, we don't know whether another one with a
-                    // nonzero top stack element exists. Make the conservative assumption that whenever the subexpression is weakly
-                    // dissatisfiable, this alternative dissatisfaction exists and leads to malleability.
-                    return {InputStack(ZERO).SetMalleable(x.nsat.available != Availability::NO && !x.nsat.has_sig), std::move(x.sat)};
-                }
-                case Fragment::WRAP_V: {
-                    auto &x = subres[0];
-                    return {INVALID, std::move(x.sat)};
-                }
-                case Fragment::JUST_0: return {EMPTY, INVALID};
-                case Fragment::JUST_1: return {INVALID, EMPTY};
+                assert(node.k <= sats.size());
+                return {std::move(nsat), std::move(sats[node.k])};
+            }
+            case Fragment::OLDER: {
+                return {INVALID, ctx.CheckOlder(node.k) ? EMPTY : INVALID};
+            }
+            case Fragment::AFTER: {
+                return {INVALID, ctx.CheckAfter(node.k) ? EMPTY : INVALID};
+            }
+            case Fragment::SHA256: {
+                std::vector<unsigned char> preimage;
+                Availability avail = ctx.SatSHA256(node.data, preimage);
+                return {ZERO32, InputStack(std::move(preimage)).SetAvailable(avail)};
+            }
+            case Fragment::RIPEMD160: {
+                std::vector<unsigned char> preimage;
+                Availability avail = ctx.SatRIPEMD160(node.data, preimage);
+                return {ZERO32, InputStack(std::move(preimage)).SetAvailable(avail)};
+            }
+            case Fragment::HASH256: {
+                std::vector<unsigned char> preimage;
+                Availability avail = ctx.SatHASH256(node.data, preimage);
+                return {ZERO32, InputStack(std::move(preimage)).SetAvailable(avail)};
+            }
+            case Fragment::HASH160: {
+                std::vector<unsigned char> preimage;
+                Availability avail = ctx.SatHASH160(node.data, preimage);
+                return {ZERO32, InputStack(std::move(preimage)).SetAvailable(avail)};
+            }
+            case Fragment::AND_V: {
+                auto &x = subres[0], &y = subres[1];
+                // As the dissatisfaction here only consist of a single option, it doesn't
+                // actually need to be listed (it's not required for reasoning about malleability of
+                // other options), and is never required (no valid miniscript relies on the ability
+                // to satisfy the type V left subexpression). It's still listed here for
+                // completeness, as a hypothetical (not currently implemented) satisfier that doesn't
+                // care about malleability might in some cases prefer it still.
+                return {(y.nsat + x.sat).SetNonCanon(), y.sat + x.sat};
+            }
+            case Fragment::AND_B: {
+                auto &x = subres[0], &y = subres[1];
+                // Note that it is not strictly necessary to mark the 2nd and 3rd dissatisfaction here
+                // as malleable. While they are definitely malleable, they are also non-canonical due
+                // to the guaranteed existence of a no-signature other dissatisfaction (the 1st)
+                // option. Because of that, the 2nd and 3rd option will never be chosen, even if they
+                // weren't marked as malleable.
+                return {(y.nsat + x.nsat) | (y.sat + x.nsat).SetMalleable().SetNonCanon() | (y.nsat + x.sat).SetMalleable().SetNonCanon(), y.sat + x.sat};
+            }
+            case Fragment::OR_B: {
+                auto &x = subres[0], &z = subres[1];
+                // The (sat(Z) sat(X)) solution is overcomplete (attacker can change either into dsat).
+                return {z.nsat + x.nsat, (z.nsat + x.sat) | (z.sat + x.nsat) | (z.sat + x.sat).SetMalleable().SetNonCanon()};
+            }
+            case Fragment::OR_C: {
+                auto &x = subres[0], &z = subres[1];
+                return {INVALID, std::move(x.sat) | (z.sat + x.nsat)};
+            }
+            case Fragment::OR_D: {
+                auto &x = subres[0], &z = subres[1];
+                return {z.nsat + x.nsat, std::move(x.sat) | (z.sat + x.nsat)};
+            }
+            case Fragment::OR_I: {
+                auto &x = subres[0], &z = subres[1];
+                return {(x.nsat + ONE) | (z.nsat + ZERO), (x.sat + ONE) | (z.sat + ZERO)};
+            }
+            case Fragment::ANDOR: {
+                auto &x = subres[0], &y = subres[1], &z = subres[2];
+                return {(y.nsat + x.sat).SetNonCanon() | (z.nsat + x.nsat), (y.sat + x.sat) | (z.sat + x.nsat)};
+            }
+            case Fragment::WRAP_A:
+            case Fragment::WRAP_S:
+            case Fragment::WRAP_C:
+            case Fragment::WRAP_N:
+                return std::move(subres[0]);
+            case Fragment::WRAP_D: {
+                auto& x = subres[0];
+                return {ZERO, x.sat + ONE};
+            }
+            case Fragment::WRAP_J: {
+                auto& x = subres[0];
+                // If a dissatisfaction with a nonzero top stack element exists, an alternative dissatisfaction exists.
+                // As the dissatisfaction logic currently doesn't keep track of this nonzeroness property, and thus even
+                // if a dissatisfaction with a top zero element is found, we don't know whether another one with a
+                // nonzero top stack element exists. Make the conservative assumption that whenever the subexpression is weakly
+                // dissatisfiable, this alternative dissatisfaction exists and leads to malleability.
+                return {InputStack(ZERO).SetMalleable(x.nsat.available != Availability::NO && !x.nsat.has_sig), std::move(x.sat)};
+            }
+            case Fragment::WRAP_V: {
+                auto& x = subres[0];
+                return {INVALID, std::move(x.sat)};
+            }
+            case Fragment::JUST_0: return {EMPTY, INVALID};
+            case Fragment::JUST_1: return {INVALID, EMPTY};
             }
             assert(false);
             return {INVALID, INVALID};
@@ -1072,7 +1112,8 @@ public:
      * This uses a custom key comparator provided by the context in order to still detect duplicates
      * for more complicated types.
      */
-    template<typename Ctx> void DuplicateKeyCheck(const Ctx& ctx) const
+    template <typename Ctx>
+    void DuplicateKeyCheck(const Ctx& ctx) const
     {
         // We cannot use a lambda here, as lambdas are non assignable, and the set operations
         // below require moving the comparators around.
@@ -1153,9 +1194,11 @@ public:
     Type GetType() const { return typ; }
 
     //! Find an insane subnode which has no insane children. Nullptr if there is none.
-    const Node* FindInsaneSub() const {
+    const Node* FindInsaneSub() const
+    {
         return TreeEval<const Node*>([](const Node& node, Span<const Node*> subs) -> const Node* {
-            for (auto& sub: subs) if (sub) return sub;
+            for (auto& sub : subs)
+                if (sub) return sub;
             if (!node.IsSaneSubexpression()) return &node;
             return nullptr;
         });
@@ -1163,41 +1206,41 @@ public:
 
     //! Determine whether a Miniscript node is satisfiable. fn(node) will be invoked for all
     //! key, time, and hashing nodes, and should return their satisfiability.
-    template<typename F>
+    template <typename F>
     bool IsSatisfiable(F fn) const
     {
         // TreeEval() doesn't support bool as NodeType, so use int instead.
         return TreeEval<int>([&fn](const Node& node, Span<int> subs) -> bool {
             switch (node.fragment) {
-                case Fragment::JUST_0:
-                    return false;
-                case Fragment::JUST_1:
-                    return true;
-                case Fragment::PK_K:
-                case Fragment::PK_H:
-                case Fragment::MULTI:
-                case Fragment::AFTER:
-                case Fragment::OLDER:
-                case Fragment::HASH256:
-                case Fragment::HASH160:
-                case Fragment::SHA256:
-                case Fragment::RIPEMD160:
-                    return bool{fn(node)};
-                case Fragment::ANDOR:
-                    return (subs[0] && subs[1]) || subs[2];
-                case Fragment::AND_V:
-                case Fragment::AND_B:
-                    return subs[0] && subs[1];
-                case Fragment::OR_B:
-                case Fragment::OR_C:
-                case Fragment::OR_D:
-                case Fragment::OR_I:
-                    return subs[0] || subs[1];
-                case Fragment::THRESH:
-                    return static_cast<uint32_t>(std::count(subs.begin(), subs.end(), true)) >= node.k;
-                default: // wrappers
-                    assert(subs.size() == 1);
-                    return subs[0];
+            case Fragment::JUST_0:
+                return false;
+            case Fragment::JUST_1:
+                return true;
+            case Fragment::PK_K:
+            case Fragment::PK_H:
+            case Fragment::MULTI:
+            case Fragment::AFTER:
+            case Fragment::OLDER:
+            case Fragment::HASH256:
+            case Fragment::HASH160:
+            case Fragment::SHA256:
+            case Fragment::RIPEMD160:
+                return bool{fn(node)};
+            case Fragment::ANDOR:
+                return (subs[0] && subs[1]) || subs[2];
+            case Fragment::AND_V:
+            case Fragment::AND_B:
+                return subs[0] && subs[1];
+            case Fragment::OR_B:
+            case Fragment::OR_C:
+            case Fragment::OR_D:
+            case Fragment::OR_I:
+                return subs[0] || subs[1];
+            case Fragment::THRESH:
+                return static_cast<uint32_t>(std::count(subs.begin(), subs.end(), true)) >= node.k;
+            default: // wrappers
+                assert(subs.size() == 1);
+                return subs[0];
             }
         });
     }
@@ -1233,8 +1276,9 @@ public:
     //! The non-malleable satisfaction is guaranteed to be valid if it exists, and ValidSatisfaction()
     //! is true. If IsSane() holds, this satisfaction is guaranteed to succeed in case the node's
     //! conditions are satisfied (private keys and hash preimages available, locktimes satsified).
-    template<typename Ctx>
-    Availability Satisfy(const Ctx& ctx, std::vector<std::vector<unsigned char>>& stack, bool nonmalleable = true) const {
+    template <typename Ctx>
+    Availability Satisfy(const Ctx& ctx, std::vector<std::vector<unsigned char>>& stack, bool nonmalleable = true) const
+    {
         auto ret = ProduceInput(ctx);
         if (nonmalleable && (ret.sat.malleable || !ret.sat.has_sig)) return Availability::NO;
         stack = std::move(ret.sat.stack);
@@ -1253,12 +1297,36 @@ public:
     Node(internal::NoDupCheck, Fragment nt, uint32_t val = 0) : fragment(nt), k(val), ops(CalcOps()), ss(CalcStackSize()), typ(CalcType()), scriptlen(CalcScriptLen()) {}
 
     // Constructors with various argument combinations, which do perform the duplicate key check.
-    template <typename Ctx> Node(const Ctx& ctx, Fragment nt, std::vector<NodeRef<Key>> sub, std::vector<unsigned char> arg, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(sub), std::move(arg), val) { DuplicateKeyCheck(ctx); }
-    template <typename Ctx> Node(const Ctx& ctx, Fragment nt, std::vector<unsigned char> arg, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(arg), val) { DuplicateKeyCheck(ctx);}
-    template <typename Ctx> Node(const Ctx& ctx, Fragment nt, std::vector<NodeRef<Key>> sub, std::vector<Key> key, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(sub), std::move(key), val) { DuplicateKeyCheck(ctx); }
-    template <typename Ctx> Node(const Ctx& ctx, Fragment nt, std::vector<Key> key, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(key), val) { DuplicateKeyCheck(ctx); }
-    template <typename Ctx> Node(const Ctx& ctx, Fragment nt, std::vector<NodeRef<Key>> sub, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(sub), val) { DuplicateKeyCheck(ctx); }
-    template <typename Ctx> Node(const Ctx& ctx, Fragment nt, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, val) { DuplicateKeyCheck(ctx); }
+    template <typename Ctx>
+    Node(const Ctx& ctx, Fragment nt, std::vector<NodeRef<Key>> sub, std::vector<unsigned char> arg, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(sub), std::move(arg), val)
+    {
+        DuplicateKeyCheck(ctx);
+    }
+    template <typename Ctx>
+    Node(const Ctx& ctx, Fragment nt, std::vector<unsigned char> arg, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(arg), val)
+    {
+        DuplicateKeyCheck(ctx);
+    }
+    template <typename Ctx>
+    Node(const Ctx& ctx, Fragment nt, std::vector<NodeRef<Key>> sub, std::vector<Key> key, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(sub), std::move(key), val)
+    {
+        DuplicateKeyCheck(ctx);
+    }
+    template <typename Ctx>
+    Node(const Ctx& ctx, Fragment nt, std::vector<Key> key, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(key), val)
+    {
+        DuplicateKeyCheck(ctx);
+    }
+    template <typename Ctx>
+    Node(const Ctx& ctx, Fragment nt, std::vector<NodeRef<Key>> sub, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, std::move(sub), val)
+    {
+        DuplicateKeyCheck(ctx);
+    }
+    template <typename Ctx>
+    Node(const Ctx& ctx, Fragment nt, uint32_t val = 0) : Node(internal::NoDupCheck{}, nt, val)
+    {
+        DuplicateKeyCheck(ctx);
+    }
 };
 
 namespace internal {
@@ -1320,7 +1388,7 @@ enum class ParseContext {
 int FindNextChar(Span<const char> in, const char m);
 
 /** Parse a key string ending at the end of the fragment's text representation. */
-template<typename Key, typename Ctx>
+template <typename Key, typename Ctx>
 std::optional<std::pair<Key, int>> ParseKeyEnd(Span<const char> in, const Ctx& ctx)
 {
     int key_size = FindNextChar(in, ')');
@@ -1331,7 +1399,7 @@ std::optional<std::pair<Key, int>> ParseKeyEnd(Span<const char> in, const Ctx& c
 }
 
 /** Parse a hex string ending at the end of the fragment's text representation. */
-template<typename Ctx>
+template <typename Ctx>
 std::optional<std::pair<std::vector<unsigned char>, int>> ParseHexStrEnd(Span<const char> in, const size_t expected_size,
                                                                          const Ctx& ctx)
 {
@@ -1345,7 +1413,7 @@ std::optional<std::pair<std::vector<unsigned char>, int>> ParseHexStrEnd(Span<co
 }
 
 /** BuildBack pops the last two elements off `constructed` and wraps them in the specified Fragment */
-template<typename Key>
+template <typename Key>
 void BuildBack(Fragment nt, std::vector<NodeRef<Key>>& constructed, const bool reverse = false)
 {
     NodeRef<Key> child = std::move(constructed.back());
@@ -1362,7 +1430,7 @@ void BuildBack(Fragment nt, std::vector<NodeRef<Key>>& constructed, const bool r
  * This does not check whether the script is valid, let alone sane. The caller is expected to use
  * the `IsValidTopLevel()` and `IsSaneTopLevel()` to check for these properties on the node.
  */
-template<typename Key, typename Ctx>
+template <typename Key, typename Ctx>
 inline NodeRef<Key> Parse(Span<const char> in, const Ctx& ctx)
 {
     using namespace spanparsing;
@@ -1679,7 +1747,7 @@ inline NodeRef<Key> Parse(Span<const char> in, const Ctx& ctx)
             if (in.size() < 1) return {};
             if (in[0] == ',') {
                 in = in.subspan(1);
-                to_parse.emplace_back(ParseContext::THRESH, n+1, k);
+                to_parse.emplace_back(ParseContext::THRESH, n + 1, k);
                 to_parse.emplace_back(ParseContext::WRAPPED_EXPR, -1, -1);
                 script_size += 2;
             } else if (in[0] == ')') {
@@ -1802,7 +1870,7 @@ enum class DecodeContext {
 };
 
 //! Parse a miniscript from a bitcoin script
-template<typename Key, typename Ctx, typename I>
+template <typename Key, typename Ctx, typename I>
 inline NodeRef<Key> DecodeScript(I& in, I last, const Ctx& ctx)
 {
     // The two integers are used to hold state for thresh()
@@ -1821,7 +1889,7 @@ inline NodeRef<Key> DecodeScript(I& in, I last, const Ctx& ctx)
         auto [cur_context, n, k] = to_parse.back();
         to_parse.pop_back();
 
-        switch(cur_context) {
+        switch (cur_context) {
         case DecodeContext::SINGLE_BKV_EXPR: {
             if (in >= last) return {};
 
@@ -2069,10 +2137,10 @@ inline NodeRef<Key> DecodeScript(I& in, I last, const Ctx& ctx)
             if (in >= last) return {};
             if (in[0].first == OP_ADD) {
                 ++in;
-                to_parse.emplace_back(DecodeContext::THRESH_W, n+1, k);
+                to_parse.emplace_back(DecodeContext::THRESH_W, n + 1, k);
                 to_parse.emplace_back(DecodeContext::W_EXPR, -1, -1);
             } else {
-                to_parse.emplace_back(DecodeContext::THRESH_E, n+1, k);
+                to_parse.emplace_back(DecodeContext::THRESH_E, n + 1, k);
                 // All children of thresh have type modifier d, so cannot be and_v
                 to_parse.emplace_back(DecodeContext::SINGLE_BKV_EXPR, -1, -1);
             }
@@ -2106,16 +2174,14 @@ inline NodeRef<Key> DecodeScript(I& in, I last, const Ctx& ctx)
                 } else if (last - in >= 3 && in[1].first == OP_0NOTEQUAL && in[2].first == OP_SIZE) {
                     in += 3;
                     to_parse.emplace_back(DecodeContext::NON_ZERO, -1, -1);
-                }
-                else {
+                } else {
                     return {};
                 }
-            // could be or_c or or_d
+                // could be or_c or or_d
             } else if (in[0].first == OP_NOTIF) {
                 ++in;
                 to_parse.emplace_back(DecodeContext::ENDIF_NOTIF, -1, -1);
-            }
-            else {
+            } else {
                 return {};
             }
             break;
@@ -2160,13 +2226,15 @@ inline NodeRef<Key> DecodeScript(I& in, I last, const Ctx& ctx)
 
 } // namespace internal
 
-template<typename Ctx>
-inline NodeRef<typename Ctx::Key> FromString(const std::string& str, const Ctx& ctx) {
+template <typename Ctx>
+inline NodeRef<typename Ctx::Key> FromString(const std::string& str, const Ctx& ctx)
+{
     return internal::Parse<typename Ctx::Key>(str, ctx);
 }
 
-template<typename Ctx>
-inline NodeRef<typename Ctx::Key> FromScript(const CScript& script, const Ctx& ctx) {
+template <typename Ctx>
+inline NodeRef<typename Ctx::Key> FromScript(const CScript& script, const Ctx& ctx)
+{
     using namespace internal;
     // A too large Script is necessarily invalid, don't bother parsing it.
     if (script.size() > MAX_STANDARD_P2WSH_SCRIPT_SIZE) return {};
