@@ -13,7 +13,7 @@ Bitcoin Core connects to the Bitcoin peer-to-peer network to download and fully
 validate blocks and transactions. It also includes a wallet and graphical user
 interface, which can be optionally built.
 
-Further information about Bitcoin Core is available in the [doc folder](/doc).
+Further information about Bitcoin Core is available in the [doc folder](doc).
 
 License
 -------
@@ -49,11 +49,11 @@ lots of money.
 Developers are strongly encouraged to write [unit tests](src/test/README.md) for new code, and to
 submit new unit tests for old code. Unit tests can be compiled and run
 (assuming they weren't disabled in configure) with: `make check`. Further details on running
-and extending unit tests can be found in [/src/test/README.md](/src/test/README.md).
+and extending unit tests can be found in [src/test/README.md](src/test/README.md).
 
 There are also [regression and integration tests](/test), written
 in Python.
-These tests can be run (if the [test dependencies](/test) are installed) with: `test/functional/test_runner.py`
+These tests can be run (if the [test dependencies](test) are installed) with: `test/functional/test_runner.py`
 
 The CI (Continuous Integration) systems make sure that every pull request is built for Windows, Linux, and macOS,
 and that unit/sanity tests are run automatically.
