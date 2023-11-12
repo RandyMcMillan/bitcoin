@@ -1,28 +1,28 @@
 This directory contains integration tests that test bitcoind and its
 utilities in their entirety. It does not contain unit tests, which
-can be found in [/src/test](/src/test), [/src/wallet/test](/src/wallet/test),
+can be found in [src/test](../src/test), [src/wallet/test](../src/wallet/test),
 etc.
 
 This directory contains the following sets of tests:
 
-- [fuzz](/test/fuzz) A runner to execute all fuzz targets from
-  [/src/test/fuzz](/src/test/fuzz).
-- [functional](/test/functional) which test the functionality of
+- [fuzz](fuzz) A runner to execute all fuzz targets from
+  [src/test/fuzz](../src/test/fuzz).
+- [functional](functional) which test the functionality of
 bitcoind and bitcoin-qt by interacting with them through the RPC and P2P
 interfaces.
-- [util](/test/util) which tests the utilities (bitcoin-util, bitcoin-tx, ...).
-- [lint](/test/lint/) which perform various static analysis checks.
+- [util](util) which tests the utilities (bitcoin-util, bitcoin-tx, ...).
+- [lint](lint) which perform various static analysis checks.
 
 The util tests are run as part of `make check` target. The fuzz tests, functional
 tests and lint scripts can be run as explained in the sections below.
 
 # Running tests locally
 
-Before tests can be run locally, Bitcoin Core must be built.  See the [building instructions](/doc#building) for help.
+Before tests can be run locally, Bitcoin Core must be built.  See the [building instructions](../doc#building) for help.
 
 ## Fuzz tests
 
-See [/doc/fuzzing.md](/doc/fuzzing.md)
+See [doc/fuzzing.md](../doc/fuzzing.md)
 
 ### Functional tests
 
@@ -215,7 +215,7 @@ levels using the logger included in the test_framework, e.g.
   `test_framework.log` and no logs are output to the console.
 - when run directly, *all* logs are written to `test_framework.log` and INFO
   level and above are output to the console.
-- when run by [our CI (Continuous Integration)](/ci/README.md), no logs are output to the console. However, if a test
+- when run by [our CI (Continuous Integration)](../ci/README.md), no logs are output to the console. However, if a test
   fails, the `test_framework.log` and bitcoind `debug.log`s will all be dumped
   to the console to help troubleshooting.
 
@@ -360,4 +360,4 @@ test/lint/all-lint.py
 
 You are encouraged to write functional tests for new or existing features.
 Further information about the functional test framework and individual
-tests is found in [test/functional](/test/functional).
+tests is found in [functional](functional).
