@@ -65,8 +65,8 @@ Coding Style (C++)
 ------------------
 
 - **Indentation and whitespace rules** as specified in
-[src/.clang-format](/src/.clang-format). You can use the provided
-[clang-format-diff script](/contrib/devtools/README.md#clang-format-diffpy)
+[src/.clang-format](../src/.clang-format). You can use the provided
+[clang-format-diff script](../contrib/devtools/README.md#clang-format-diffpy)
 tool to clean up patches automatically before submission.
   - Braces on new lines for classes, functions, methods.
   - Braces on the same line for everything else.
@@ -238,7 +238,7 @@ git diff | ( cd ./src/ && clang-tidy-diff -p2 -j $(nproc) )
 Coding Style (Python)
 ---------------------
 
-Refer to [/test/functional/README.md#style-guidelines](/test/functional/README.md#style-guidelines).
+Refer to [test/functional/README.md#style-guidelines](../test/functional/README.md#style-guidelines).
 
 
 Coding Style (Doxygen-compatible comments)
@@ -330,7 +330,7 @@ Recommendations:
 - Avoid linking to external documentation; links can break.
 
 - Javadoc and all valid Doxygen comments are stripped from Doxygen source code
-  previews (`STRIP_CODE_COMMENTS = YES` in [Doxyfile.in](doc/Doxyfile.in)). If
+  previews (`STRIP_CODE_COMMENTS = YES` in [Doxyfile.in](../doc/Doxyfile.in)). If
   you want a comment to be preserved, it must instead use `//` or `/* */`.
 
 ### Generating Documentation
@@ -577,7 +577,7 @@ about any additional options.
 
 There are a number of known problems when using the `address` sanitizer. The
 address sanitizer is known to fail in
-[sha256_sse4::Transform](/src/crypto/sha256_sse4.cpp) which makes it unusable
+[sha256_sse4::Transform](../src/crypto/sha256_sse4.cpp) which makes it unusable
 unless you also use `--disable-asm` when running configure. We would like to fix
 sanitizer issues, so please send pull requests if you can fix any errors found
 by the address sanitizer (or any other sanitizer).
@@ -855,7 +855,7 @@ Strings and formatting
     buffer overflows, and surprises with `\0` characters. Also, some C string manipulations
     tend to act differently depending on platform, or even the user locale.
 
-- Use `ToIntegral` from [`strencodings.h`](/src/util/strencodings.h) for number parsing. In legacy code you might also find `ParseInt*` family of functions, `ParseDouble` or `LocaleIndependentAtoi`.
+- Use `ToIntegral` from [`strencodings.h`](../src/util/strencodings.h) for number parsing. In legacy code you might also find `ParseInt*` family of functions, `ParseDouble` or `LocaleIndependentAtoi`.
 
   - *Rationale*: These functions do overflow checking and avoid pesky locale issues.
 
