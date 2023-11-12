@@ -20,7 +20,7 @@ don't have test cases for.
 - Where possible, try to adhere to [PEP-8 guidelines](https://www.python.org/dev/peps/pep-0008/)
 - Use a python linter like flake8 before submitting PRs to catch common style
   nits (eg trailing whitespace, unused imports, etc)
-- The oldest supported Python version is specified in [doc/dependencies.md](/doc/dependencies.md).
+- The oldest supported Python version is specified in [doc/dependencies.md](../../doc/dependencies.md).
   Consider using [pyenv](https://github.com/pyenv/pyenv), which checks [.python-version](/.python-version),
   to prevent accidentally introducing modern syntax from an unsupported Python version.
   The CI linter job also checks this, but [possibly not in all cases](https://github.com/bitcoin/bitcoin/pull/14884#discussion_r239585126).
@@ -57,7 +57,7 @@ don't have test cases for.
 
 - Instead of inline comments or no test documentation at all, log the comments to the test log, e.g.
   `self.log.info('Create enough transactions to fill a block')`. Logs make the test code easier to read and the test
-  logic easier [to debug](/test/README.md#test-logging).
+  logic easier [to debug](../../test/README.md#test-logging).
 - Set `self.num_nodes` to the minimum number of nodes necessary for the test.
   Having additional unrequired nodes adds to the execution time of the test as
   well as memory/CPU/disk requirements (which is important when running tests in
