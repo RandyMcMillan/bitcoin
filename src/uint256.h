@@ -203,7 +203,6 @@ public:
             m_data[i] = (val >> (i * 8)) & 0xFF;
         }
     }
-    constexpr explicit uint256(uint8_t v) : base_blob<256>(v) {}
     consteval explicit uint256(std::string_view hex_str) : base_blob<256>() {
         if (hex_str.size() > 64) {
             throw "Invalid hex string size in consteval uint256";
