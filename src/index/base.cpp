@@ -193,7 +193,7 @@ void BaseIndex::Sync()
                 LogInfo("%s: m_interrupt set; exiting ThreadSync", GetName());
 
                 SetBestBlockIndex(pindex);
-                // No need to handle errors in Commit. If it fails, the error will be already be
+                // No need to handle errors in Commit. If it fails, the error will already be
                 // logged. The best way to recover is to continue, as index cannot be corrupted by
                 // a missed commit to disk for an advanced index state.
                 Commit();
